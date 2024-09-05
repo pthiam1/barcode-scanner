@@ -22,7 +22,7 @@ Le TP est à réaliser individuellement.
 ## Technologies requises
 
 Vous allez avoir besoin des technologies suivantes :
-- [Android Studio](https://developer.android.com/studio "Android Studio") ainsi que la [JDK 20+](https://www.oracle.com/fr/java/technologies/downloads "JDK")
+- [Android Studio](https://developer.android.com/studio "Android Studio")
 - [Docker](https://www.docker.com "Docker") Desktop ou CLI
 - [NodeJS LTS](https://nodejs.org/fr "NodeJS")
 - Un compte [Stripe](https://stripe.com/fr "Stripe")
@@ -33,20 +33,20 @@ Vous devez réaliser une application d'achat d'objets en tout genre à l'aide de
 
 Elle doit comprendre les pages/fonctionnalités suivantes :
 
-- [ ] Scan de codes-barres
-    - [ ] Accès au panier
-    - [ ] Si l'appareil photo n'est pas disponible, il faut pouvoir ajouter les articles manuellement
-    - [ ] Une vérification via l'API est nécessaire afin de savoir si l'article existe
-- [ ] Un panier
-    - [ ] Contient l'ensemble des articles scannés
-    - [ ] Accessible depuis la page de scan des articles
-    - [ ] Possibilité de retirer du panier un article scanné
-    - [ ] Lorsque qu'un article est ajouté plusieurs fois, afficher un indicateur précisant le nombre du même article
-    - [ ] Possibilité d'augmenter la quantité d'un article déjà scanné
-    - [ ] Possibilité de payer les articles sélectionnés à l'aide de Stripe
-    - [ ] Sauvergarde du panier pour de futurs achats
-- [ ] Un historique des articles payés
-- [ ] Un [thème jour/nuit](https://m2.material.io/design/color/dark-theme.html#ui-application)
+- Scan de codes-barres
+    - Accès au panier
+    - Si l'appareil photo n'est pas disponible, il faut pouvoir ajouter les articles manuellement
+    - Une vérification via l'API est nécessaire afin de savoir si l'article existe
+- Un panier
+    - Contient l'ensemble des articles scannés
+    - Accessible depuis la page de scan des articles
+    - Possibilité de retirer du panier un article scanné
+    - Lorsque qu'un article est ajouté plusieurs fois, afficher un indicateur précisant le nombre du même article
+    - Possibilité d'augmenter la quantité d'un article déjà scanné
+    - Possibilité de payer les articles sélectionnés à l'aide de Stripe
+    - Sauvergarde du panier pour de futurs achats
+- Un historique des articles payés
+- Un [thème jour/nuit](https://m2.material.io/design/color/dark-theme.html#ui-application)
 
 
 Le projet est composé des choses suivantes :
