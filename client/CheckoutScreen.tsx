@@ -1,7 +1,7 @@
 import { useStripe } from "@stripe/stripe-react-native";
 import Constants from "expo-constants";
 import React, { useEffect, useState } from "react";
-import { Alert, Text, Button, SafeAreaView, View } from "react-native";
+import { Alert, Text, Button, SafeAreaView } from "react-native";
 
 export default function CheckoutScreen() {
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
@@ -10,7 +10,7 @@ export default function CheckoutScreen() {
 
     const apiUrl = Constants.expoConfig.extra.apiUrl;
 
-    const userId = "cus_OmpJZapHkM2keT";
+    const userId = "cus_QwzBuC11JSfBoD";
     const items = [
         {
             "id": 1,
