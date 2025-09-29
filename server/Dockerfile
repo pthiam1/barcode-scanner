@@ -1,5 +1,5 @@
 
-FROM python:3.10.7-slim-buster
+FROM python:3.11
 
 WORKDIR /build
 
@@ -16,7 +16,7 @@ RUN pip install poetry
 # force global installation
 RUN poetry config virtualenvs.create false --local
 
-RUN poetry install --only main
+RUN poetry install --no-root
 
 COPY . .
 
