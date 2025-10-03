@@ -8,7 +8,7 @@ export default function CheckoutScreen() {
     const [loading, setLoading] = useState(false);
     const [paymentIntentId, setPaymentIntentId] = useState<string>("");
 
-    const apiUrl = "http://172.26.7.111:8000"; // Constants.manifest?.extra?.apiUrl;
+    const apiUrl = "http://192.168.0.23:8000"; // Constants.manifest?.extra?.apiUrl;
 
     const userId = "cus_T8zpBeuw6j7c5k";
     const items = [
