@@ -38,8 +38,18 @@ def read_items(
     return get_items(offset, limit)
 
 
+
 @item_router.delete("/", response_model=ItemSchema)
 def remove_item(
     item_id: int,
 ):
     return delete_item(item_id)
+
+
+# nouvelle route pour obtenir un item par son code barre - Papa thiam
+@item_router.get("/barcode/{barcode}", response_model=ItemSchema)
+def read_item_by_barcode(
+    barcode: str,
+):
+    from .controllers import get_item_by_barcode
+    return get_item_by_barcode(barcode)

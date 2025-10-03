@@ -2,8 +2,7 @@
 
 |   Nom   | Prénom |
 |---------|--------|
-|   Doe   |  Jane  |
-|   Doe   |  John  |
+| Thiam   | Papa Abdoulaye |
 
 Le TP est à réaliser par groupe de 2.
 

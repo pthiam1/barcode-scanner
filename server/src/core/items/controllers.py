@@ -52,3 +52,11 @@ def get_item(item_id: int) -> Optional[Item]:
 def get_items(offset: int, limit: int) -> List[Item]:
     with Session(engine) as db:
         return db.query(Item).offset(offset).limit(limit).all()
+
+# fonction pour obtenir un item par son code barre [Papa thiam]
+def get_item_by_barcode(barcode: str) -> Optional[Item]:
+    with Session(engine) as db:
+        item: Optional[Item] = db.query(Item).filter(Item.barcode == barcode).first()
+        if not item:
+            raise NotFoundException("Item not found")
+        return item

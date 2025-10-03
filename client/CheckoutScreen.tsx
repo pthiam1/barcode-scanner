@@ -1,22 +1,25 @@
 import { useStripe } from "@stripe/stripe-react-native";
 import Constants from "expo-constants";
 import React, { useEffect, useState } from "react";
-import { Alert, Text, Button, SafeAreaView } from "react-native";
+import { Alert, Text, Button} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useCart } from "./screens/CartContext";
+
 
 export default function CheckoutScreen() {
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const [loading, setLoading] = useState(false);
     const [paymentIntentId, setPaymentIntentId] = useState<string>("");
+    const { items, moveCartToHistory } = useCart();
 
-    const apiUrl = "http://192.168.0.23:8000"; // Constants.manifest?.extra?.apiUrl;
-
-    const userId = "cus_T8zpBeuw6j7c5k";
-    const items = [
-        {
-            "id": 1,
-            "amount": 2
-        }
-    ];
+    const apiUrl = "http://192.168.0.23:8000"; 
+    const userId = "cus_T8z0MLLNC5khnY";
+    
+    // Convertir les items du panier pour l'API
+    const pendingItems = items.map(item => ({
+        id: parseInt(item.id) || 1, // Fallback si l'ID n'est pas un nombre
+        amount: item.quantity
+    }));
 
     const fetchPaymentSheetParams = async () => {
         const response = await fetch(`${apiUrl}/payments/`, {
@@ -25,7 +28,7 @@ export default function CheckoutScreen() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                "pending_items": items,
+                "pending_items": pendingItems,
                 "customer_id": userId
             })
         });
@@ -38,7 +41,7 @@ export default function CheckoutScreen() {
             customer,
         };
     };
-
+    //initialisation du payment sheet
     const initializePaymentSheet = async () => {
         const {
             paymentIntent,
@@ -59,7 +62,7 @@ export default function CheckoutScreen() {
             setLoading(true);
         }
     };
-
+    //ouverture du payment sheet et confirmation du paiement
     const openPaymentSheet = async () => {
         const { error } = await presentPaymentSheet();
 
@@ -77,7 +80,16 @@ export default function CheckoutScreen() {
                 })
             });
 
-            if (response.status == 200) Alert.alert('Success', 'Your order is confirmed!');
+            if (response.status == 200) {
+                try {
+                    // Enregistrer l'achat dans l'historique
+                    await moveCartToHistory();
+                    Alert.alert('Success', 'Your order is confirmed and saved to history!');
+                } catch (error) {
+                    console.error('Erreur sauvegarde historique:', error);
+                    Alert.alert('Success', 'Your order is confirmed!');
+                }
+            }
         }
     };
 

@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class ItemBase(BaseModel):
     name: str
     price: int
+    barcode: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -14,6 +15,7 @@ class ItemBase(BaseModel):
 
 class ItemSchema(ItemBase):
     id: int
+    barcode: Optional[str] = None
 
     class Config:
         orm_mode = True

@@ -1,9 +1,7 @@
-# server/src/core/items/models.py
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
 from ..database import Base
-
 
 class Item(Base):
     __tablename__ = "items"
@@ -11,15 +9,16 @@ class Item(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     price = Column(Integer, default=0)
+    barcode = Column(String, unique=True, index=True)
 
-    purchased_items = relationship("PurchasedItem")
+    # Relation vers PurchasedItem
+    purchased_items = relationship("PurchasedItem", back_populates="item")
 
 
 class PurchasedItem(Base):
     __tablename__ = "purchased_items"
 
     id = Column(Integer, primary_key=True, index=True)
-
     amount = Column(Integer, nullable=False)
 
     payment_id = Column(Integer, ForeignKey("payments.id"))
