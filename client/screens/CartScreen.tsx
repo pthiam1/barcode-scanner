@@ -1,3 +1,7 @@
+/**
+ * Auteur: Papa Thiam
+ * Fonctionnalité: Affichage et gestion du panier, modification des quantités, suppression d'articles, passage à la caisse, et navigation vers l'historique.
+ */
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -36,6 +40,7 @@ export default function CartScreen({ navigation }: any) {
     setTimeout(() => setRefreshing(false), 1000);
   };
 
+  // Gérer le changement de quantité dans le panier
   const handleQuantityChange = async (id: string, newQuantity: number) => {
     if (newQuantity <= 0) {
       Alert.alert(
@@ -62,6 +67,7 @@ export default function CartScreen({ navigation }: any) {
     );
   };
 
+  // Naviguer vers l'écran de paiement
   const handleCheckout = () => {
     if (items.length === 0) {
       Alert.alert('Panier vide', 'Ajoutez des produits avant de passer commande.');

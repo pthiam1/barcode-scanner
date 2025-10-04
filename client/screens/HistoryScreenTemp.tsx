@@ -1,3 +1,7 @@
+/**
+ * Auteur: Papa Thiam
+ * Fonctionnalité: Affichage de l'historique des achats, avec possibilité de rafraîchir et de vider l'historique.
+ */
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -88,7 +92,7 @@ export default function HistoryScreen({ navigation }: any) {
       console.error('Erreur lors de la suppression de l\'historique:', error);
     }
   };
-
+  // Rendu d'un item de l'historique
   const renderHistoryItem = ({ item }: { item: HistoryItem }) => (
     <View style={styles.historyItem}>
       <View style={styles.historyHeader}>
@@ -109,6 +113,7 @@ export default function HistoryScreen({ navigation }: any) {
     </View>
   );
 
+  // Affichage quand l'historique est vide
   const renderEmptyHistory = () => (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyText}>Aucun achat dans l'historique</Text>

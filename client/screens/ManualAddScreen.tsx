@@ -1,4 +1,8 @@
-// ManualAddScreen.tsx
+/**
+ * Auteur: Papa Thiam
+ * Fonctionnalité: Ajout manuel de produits avec interaction avec une API distante et gestion du panier local.
+ */
+
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert } from 'react-native';
 import { useCart } from './CartContext';

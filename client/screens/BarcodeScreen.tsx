@@ -1,3 +1,7 @@
+/**
+ * Auteur: Papa Thiam
+ * Fonctionnalité: Scanner de code-barres avec caméra, ajout automatique au panier via API backend, gestion des erreurs et navigation.
+ */
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, Alert, StyleSheet } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
@@ -7,7 +11,7 @@ export default function BarcodeScreen({ navigation }: any) {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
   const { addItem } = useCart();
-  const apiUrl = 'http://192.168.0.23:8000';
+  const apiUrl = 'http://192.168.0.23:8000'; // Remplace par l'IP de ton backend
 
   useEffect(() => {
     (async () => {

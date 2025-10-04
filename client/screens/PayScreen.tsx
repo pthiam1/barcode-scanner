@@ -1,3 +1,7 @@
+/**
+ * Auteur: Papa Thiam
+ * Fonctionnalité: Écran de paiement avec intégration Stripe, gestion du panier, et navigation post-paiement.
+ */
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -109,12 +113,12 @@ export default function PayScreen({ navigation }: any) {
       }
 
       // Paiement réussi
-      console.log('✅ Paiement réussi!');
+      console.log('Paiement réussi!');
       
       try {
         // Déplacer le panier vers l'historique
         await moveCartToHistory();
-        console.log('✅ Panier déplacé vers l\'historique');
+        console.log('Panier déplacé vers l\'historique');
         
         Alert.alert(
           'Paiement réussi ! 🎉',

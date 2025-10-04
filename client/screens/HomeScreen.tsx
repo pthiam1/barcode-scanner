@@ -1,4 +1,7 @@
-// HomeScreen.tsx
+/**
+ * Auteur: Papa Thiam
+ * Fonctionnalité: Écran d'accueil avec navigation vers différentes fonctionnalités de l'application.
+ */
 import React from 'react';
 import {
   View,

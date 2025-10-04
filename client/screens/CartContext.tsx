@@ -1,9 +1,14 @@
 
+/**
+ * Auteur: Papa Thiam
+ * Fonctionnalité: Gestion du panier avec contexte React, persistance SQLite, historique des achats, et fonctions de débogage.
+ */
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import * as SQLite from 'expo-sqlite';
 
 type Item = {
-  id: string; // barcode or product id
+  id: string; // product id
   title: string;
   price: number; // cents
   quantity: number;
@@ -177,17 +182,17 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
       
       // Contenu du panier
       const cartItems = await db.getAllAsync('SELECT * FROM cart;');
-      console.log('🛒 Panier actuel:', cartItems);
+      console.log('Panier actuel:', cartItems);
       
       // Contenu de l'historique
       const historyItems = await db.getAllAsync('SELECT * FROM history;');
-      console.log('📚 Historique:', historyItems);
+      console.log('Historique:', historyItems);
       
       // Statistiques
       const cartCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM cart;') as {count: number};
       const historyCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM history;') as {count: number};
       
-      console.log(`📊 Statistiques: ${cartCount.count} items dans le panier, ${historyCount.count} dans l'historique`);
+      console.log(`Statistiques: ${cartCount.count} items dans le panier, ${historyCount.count} dans l'historique`);
     } catch (error) {
       console.error('Erreur debug DB:', error);
     }
@@ -222,7 +227,7 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
       // Vider le panier
       await clearCart();
       
-      console.log('✅ Achat enregistré dans l\'historique');
+      console.log('Achat enregistré dans l\'historique');
     } catch (error) {
       console.error('Erreur enregistrement achat:', error);
       throw error;
