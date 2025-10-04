@@ -1,6 +1,6 @@
 # 📱 AfricaMarket - Scanner Code-Barres
 
-Ce projet de TP académique en M2 S1 vise à développer une application mobile de commerce électronique avec scanner de code-barres, développée en React Native avec intégration Stripe pour les paiements.
+Ce projet de TP académique en M2 vise à développer une application mobile de  électronique avec scanner de code-barres ou ajout manuel de produits, gestion de panier, et paiements via Stripe. L'application est construite avec React Native pour le frontend et FastAPI pour le backend.
 
 ## Fonctionnalités
 
@@ -23,9 +23,11 @@ Ce projet de TP académique en M2 S1 vise à développer une application mobile 
 - **Historique** : Consultation des achats passés
 
 
-<img src="./client/assets/Screenshot_20251004_143018.png" alt="Accueil" width="200"/> <img src="./client/assets/Screenshot_20251004_144056.png" alt="Scanner" width="200"/> <img src="./client/assets/Screenshot_20251004_143052.png" alt="Ajout Manuel" width="200"/>
+<img src="./client/assets/Screenshot_20251004_143018.png" alt="Accueil" width="200"/> <img src="./client/assets/Screenshot_20251004_144056.png" alt="Scanner" width="200"/> <img src="./client/assets/Screenshot_20251004_143052.png" alt="Ajout Manuel" width="200"/> <img src="./client/assets/Screenshot_20251004_150631.png" alt="Stripe Paiement" width="200"/>
+
 
 <img src="./client/assets/Screenshot_20251004_144305.png" alt="Panier" width="200"/> <img src="./client/assets/Screenshot_20251004_144420.png" alt="Paiement" width="200"/> <img src="./client/assets/Screenshot_20251004_144647.png" alt="Historique" width="200"/>
+<img src="./client/assets/Screenshot_20251004_144633.png" alt="Paiement Réussi" width="200"/>
 ## Technologies Utilisées
 
 ### Frontend (Client)
