@@ -11,7 +11,7 @@ class Item(Base):
     price = Column(Integer, default=0)
     barcode = Column(String, unique=True, index=True)
 
-    # Relation vers PurchasedItem
+    # Relation vers PurchasedItem pour les achats associés à cet item[Papa thiam]
     purchased_items = relationship("PurchasedItem", back_populates="item")
 
 

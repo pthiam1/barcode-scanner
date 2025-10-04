@@ -7,7 +7,7 @@ from pydantic import BaseModel
 class ItemBase(BaseModel):
     name: str
     price: int
-    barcode: Optional[str] = None
+    barcode: Optional[str] = None # code barre [Papa thiam]
 
     class Config:
         orm_mode = True
