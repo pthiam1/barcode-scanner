@@ -79,7 +79,7 @@ def create_sheet(
 
     payment_intent = stripe.PaymentIntent.create(
         amount=price,
-        currency='eur',
+        currency='xof',
         customer=customer_stripe,
         automatic_payment_methods={
             'enabled': True,

@@ -12,7 +12,7 @@ export default function ManualAddScreen({ navigation }: any) {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const { addItem } = useCart();
-  const apiUrl = 'http://192.168.0.23:8000';
+  const apiUrl = 'http://172.26.4.34:8000';
 
   const handleAddProduct = async () => {
     if (!barcode || !name || !price) {

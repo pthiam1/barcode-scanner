@@ -1,6 +1,6 @@
 
 /**
- * Auteur: Papa Thiam
+ * Auteur: Papa Thiam 
  * Fonctionnalité: Gestion du panier avec contexte React, persistance SQLite, historique des achats, et fonctions de débogage.
  */
 
@@ -39,7 +39,7 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
   useEffect(() => {
     const initDatabase = async () => {
       try {
-        const database = await SQLite.openDatabaseAsync('AfricaMarket.db'); 
+        const database = await SQLite.openDatabaseAsync('AfricaMarket.db'); //AfricaMarket.db se trouve dans le dossier racine de l'application
         
         // Créer les tables si elles n'existent pas
         await database.execAsync(`
@@ -60,6 +60,17 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
         
         setDb(database);
         await loadCartFromDb(database);
+        // test pour voir les infos de la base
+        const dbInfo = await database.getAllAsync("SELECT name FROM sqlite_master WHERE type='table';");
+        console.log('Tables dans la DB:', dbInfo);
+        //les contenus des tables
+        const cartContents = await database.getAllAsync("SELECT * FROM cart;");
+        console.log('Contenu de la table cart:', cartContents);
+        const historyContents = await database.getAllAsync("SELECT * FROM history;");
+        console.log('Contenu de la table history:', historyContents);
+
+        
+
       } catch (error) {
         console.error('Erreur initialisation DB:', error);
       } finally {
@@ -122,7 +133,7 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
       setItems(prev => {
         const found = prev.find(p => p.id === item.id);
         if (found) {
-          return prev.map(p => p.id === item.id ? { ...p, quantity: newQuantity } : p);
+          return prev.map(p => p.id === item.id ? { ...p, quantity: newQuantity } : p); 
         } else {
           return [...prev, { ...item, quantity: newQuantity }];
         }

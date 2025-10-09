@@ -157,3 +157,5 @@ const stripePK = "pk_test_votre_cle_publique_stripe";
 ## Auteur
 **Papa Thiam**
 > Projet M2 - Programmation Mobile
+
+**Status** : En cours de finalisation

@@ -23,7 +23,7 @@ export default function PayScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
   const [paymentReady, setPaymentReady] = useState(false);
 
-  const apiUrl = 'http://192.168.0.23:8000';
+  const apiUrl = 'http://172.26.4.134:8000';
   const userId = 'cus_TAbp6YpLSrRqOU'; // ID du client créé
 
   // Calculer le total
