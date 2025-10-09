@@ -229,9 +229,11 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
       
       // Copier les items du panier vers l'historique
       for (const item of items) {
+        // générer un id unique pour chaque ligne d'historique afin d'éviter les collisions
+        const uniqueId = `${item.id}_${timestamp}_${Math.random().toString(36).slice(2,8)}`;
         await db.runAsync(
           'INSERT INTO history (id, title, price, quantity, paid_at) VALUES (?, ?, ?, ?, ?);',
-          [item.id, item.title, item.price, item.quantity, timestamp]
+          [uniqueId, item.title, item.price, item.quantity, timestamp]
         );
       }
       
