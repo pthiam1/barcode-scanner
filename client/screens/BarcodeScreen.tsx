@@ -2,8 +2,8 @@
  * Auteur: Papa Thiam
  * Fonctionnalité: Scanner de code-barres avec caméra, ajout automatique au panier via API backend, gestion des erreurs et navigation.
  */
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, Alert, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, Button, Alert, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Platform, Animated, Keyboard, EmitterSubscription } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import { useCart } from './CartContext';
 
@@ -15,6 +15,43 @@ export default function BarcodeScreen({ navigation }: any) {
   const { addItem } = useCart();
   const apiUrl = 'http://172.26.4.134:8000'; // Remplace par l'IP de ton backend
   const [lastAdded, setLastAdded] = useState<string | null>(null);
+
+  const shift = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    let showSub: EmitterSubscription | null = null;
+    let hideSub: EmitterSubscription | null = null;
+
+    const onKeyboardShow = (e: any) => {
+      const height = e.endCoordinates ? e.endCoordinates.height : 250;
+      Animated.timing(shift, {
+        toValue: -height / 1.5,
+        duration: 250,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const onKeyboardHide = () => {
+      Animated.timing(shift, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    if (Platform.OS === 'ios') {
+      showSub = Keyboard.addListener('keyboardWillShow', onKeyboardShow);
+      hideSub = Keyboard.addListener('keyboardWillHide', onKeyboardHide);
+    } else {
+      showSub = Keyboard.addListener('keyboardDidShow', onKeyboardShow);
+      hideSub = Keyboard.addListener('keyboardDidHide', onKeyboardHide);
+    }
+
+    return () => {
+      showSub && showSub.remove();
+      hideSub && hideSub.remove();
+    };
+  }, [shift]);
 
   useEffect(() => {
     (async () => {
@@ -113,8 +150,8 @@ export default function BarcodeScreen({ navigation }: any) {
         />
       </View>
 
-      <View style={styles.bottomHalf}>
-        <View style={styles.bottomContent}>939297
+      <Animated.View style={[styles.bottomHalf, { transform: [{ translateY: shift }] }] }>
+        <View style={styles.bottomContent}>
           <View style={styles.manualRow}>
             <TextInput
               placeholder="Entrer code-barres"
@@ -149,7 +186,7 @@ export default function BarcodeScreen({ navigation }: any) {
             </View>
           ) : null}
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }
