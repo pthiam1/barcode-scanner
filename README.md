@@ -2,160 +2,125 @@
 
 Ce projet de TP académique en M2 vise à développer une application mobile de  électronique avec scanner de code-barres ou ajout manuel de produits, gestion de panier, et paiements via Stripe. L'application est construite avec React Native pour le frontend et FastAPI pour le backend.
 
-## Fonctionnalités
+## Principales fonctionnalités
+ ---------------------------
+ - Scanner de code‑barres avec la caméra (ou saisie manuelle)
+ - Ajout automatique d'un produit au panier après lecture
+ - Gestion du panier (quantités, suppression, vider)
+ - Paiements via Stripe (PaymentSheet)
+ - Historique des commandes (persisté en SQLite)
+ - Mode Jour / Nuit global (toggle) — thème persistant
+ - Persistance locale via SQLite (cart, orders, order_items)
 
-###  Fonctionnalités Implémentées
-- **Scanner de code-barres** avec caméra intégrée
-- **Ajout manuel** de produits si la caméra n'est pas disponible
-- **Panier intelligent** avec gestion des quantités
-- **Paiements sécurisés** via Stripe
-- **Historique des achats** avec interface moderne
-- **Persistance des données** avec SQLite
-- **API Backend** complète avec FastAPI
-- **Navigation fluide** entre tous les écrans
+## Structure du projet
+ -------------------
+ barcode-scanner/
+ - client/       -> Application React Native (Expo)
+	 - screens/    -> Écrans de l'application
+	 - theme/      -> ThemeProvider + toggle (jour/nuit)
+	 - assets/     -> Images et ressources (icônes, screenshots)
+ - server/       -> API FastAPI (endpoints produits / paiements)
+ - Code-barre/   -> Outils / scripts utilitaires pour générer des codes
 
-###  Écrans Disponibles
-- **Accueil** : Navigation principale
-- **Scanner** : Scan de codes-barres avec caméra
-- **Ajout Manuel** : Saisie manuelle de produits
-- **Panier** : Gestion des articles et quantités
-- **Paiement** : Intégration Stripe complète
-- **Historique** : Consultation des achats passés
+ Prérequis
+ ---------
+ - Node.js LTS
+ - Yarn ou npm
+ - Expo CLI (optionnel mais recommandé)
+ - Android Studio / Xcode ou un appareil réel
+ - Python 3.8+ (pour le backend)
+ - Compte Stripe pour tests (clé publique + clé secrète)
 
+ Installation et exécution
+ -------------------------
+ 1) Backend
 
-<img src="./client/assets/Screenshot_20251004_143018.png" alt="Accueil" width="200"/> <img src="./client/assets/Screenshot_20251004_144056.png" alt="Scanner" width="200"/> <img src="./client/assets/Screenshot_20251004_143052.png" alt="Ajout Manuel" width="200"/> <img src="./client/assets/Screenshot_20251004_150631.png" alt="Stripe Paiement" width="200"/>
+ Ouvrir un terminal et lancer le backend (depuis `server/`). Exemples :
 
+ - Avec Docker (recommandé si disponible) :
 
-<img src="./client/assets/Screenshot_20251004_144305.png" alt="Panier" width="200"/> <img src="./client/assets/Screenshot_20251004_144420.png" alt="Paiement" width="200"/> <img src="./client/assets/Screenshot_20251004_144647.png" alt="Historique" width="200"/>
-<img src="./client/assets/Screenshot_20251004_144633.png" alt="Paiement Réussi" width="200"/>
-## Technologies Utilisées
+ ```bash
+ cd server
+ sudo docker compose up --build
+ ```
 
-### Frontend (Client)
-- **React Native** avec Expo SDK 54
-- **TypeScript** pour le typage
-- **React Navigation 6** pour la navigation
-- **Expo Camera** pour le scanner
-- **Expo SQLite** pour la persistance
-- **Stripe React Native** pour les paiements
+ - Sans Docker (local) :
 
-### Backend (Serveur)
-- **FastAPI** (Python)
-- **SQLite** base de données
-- **Stripe API** pour les paiements
-- **Docker** pour le déploiement
+ ```bash
+ cd server
+ python -m venv .venv
+ source .venv/bin/activate
+ pip install -r requirements.txt
+ uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+ ```
 
-##  Structure du Projet
+ 2) Frontend (client)
 
-```
-barcode-scanner/
-├── client/                 # Application React Native
-│   ├── screens/           # Écrans de l'application
-│   ├── assets/           # Images et ressources
-│   └── android/          # Configuration Android
-├── server/               # API Backend FastAPI
-│   ├── src/             # Code source Python
-│   └── docker-compose.yml
-├── Code-barre/          # Outils de génération de codes-barres
-└── venv/                # Environnement Python virtuel
-```
+ ```bash
+ cd client
+ npm install
+ # Lancer sur Android (ou utiliser Expo dev tools)
+ npm run android
+ ```
 
-##  Installation et Lancement
+ Remarques réseau :
+ - Si le serveur est lancé en local sur une machine différente (même réseau), mettez à jour l'URL `apiUrl` dans les écrans (par ex. `client/screens/BarcodeScreen.tsx` et `client/CheckoutScreen.tsx`) pour pointer vers l'adresse IP du serveur.
 
-### Prérequis
-- Node.js LTS
-- Android Studio ou émulateur
-- Python 3.8+
-- Compte Stripe (pour les paiements)
+ Configuration Stripe
+ --------------------
+ - Définissez les clés Stripe dans le backend (fichier `.env` à la racine de `server/`) :
 
-### 1. Backend (Serveur)
-```bash
-cd server
-# Avec Docker (recommandé)
-sudo docker compose up --build
-sudo docker compose logs -f 
+ ```
+ STRIPE_SK=sk_test_xxx
+ STRIPE_PK=pk_test_xxx
+ ```
 
+ - Dans `client/App.tsx` la clé publique est utilisée pour initialiser Stripe : remplacez la clé de test par la vôtre lorsque nécessaire.
 
-```
+ Base de données locale (SQLite)
+ -------------------------------
+ Le frontend utilise SQLite pour persister :
+ - `cart` : articles actuellement dans le panier
+ - `orders` : chaque commande payée (order_id, paid_at, total)
+ - `order_items` : lignes de chaque commande (product_id, title, price, quantity)
 
-### 2. Frontend (Client)
-```bash
-cd client
-npm install
-npm run android  # ou npm run ios
-```
+ Lors du paiement validé, le panier est converti en `orders` + `order_items` (transactionnel) puis vidé.
 
-### 3. Génération de Codes-Barres (Optionnel)
-```bash
-# Créer l'environnement virtuel
-python3 -m venv venv
-source venv/bin/activate
+ API exposées côté backend (exemples)
+ -------------------------------------
+ - GET /items/                 — liste produits
+ - POST /items/                — créer produit
+ - GET /items/barcode/{code}   — récupérer produit par code‑barres
+ - POST /payments/             — créer session / payment intent pour Stripe
+ - POST /payments/check/{id}   — vérifier statut paiement (optionnel)
 
-# Installer les dépendances
-pip install python-barcode pillow requests
+ Design & theming
+ -----------------
+ - Un `ThemeProvider` expose `useTheme()` qui fournit :
+	 - `theme` : 'light' | 'dark'
+	 - `colors` : palette (background, card, text, primary, border, muted)
+	 - `toggleTheme()` : bascule et persistance via AsyncStorage
+ - Le toggle est accessible depuis le header et depuis l'écran d'accueil.
 
-# Générer des codes-barres de test
-python Code-barre/generate_product_barcodes.py
-```
-# Aperçu de l'Application
+ Conseils de développement
+ -------------------------
+ - Lancer `npx tsc --noEmit` dans le dossier `client` permet de vérifier les erreurs TypeScript sans lancer l'application.
+ - Utiliser les logs (Metro / console du backend) pour diagnostiquer les appels API et erreurs SQLite.
 
-## Configuration
+ Dépannage courant
+ -----------------
+ - Erreur caméra : vérifier les permissions et l'état de `Camera.requestCameraPermissionsAsync()`.
+ - Erreur de connexion au backend : vérifier l'URL `apiUrl` et le pare‑feu/local network.
+ - Erreur Stripe : vérifier vos clés et les logs du backend.
 
-### Variables d'Environnement (Server)
-Créer un fichier `.env` dans le dossier `server/` :
-```env
-STRIPE_SK=sk_test_votre_cle_secrete_stripe
-STRIPE_PK=pk_test_votre_cle_publique_stripe
-```
+ Notes techniques
+ ----------------
+ - Le panier utilise un contexte React (`CartContext`) pour exposer : `items`, `addItem`, `removeItem`, `setQuantity`, `clearCart`, `saveCart`, `loadCart`, `getHistory`, `moveCartToHistory`, `clearHistory`.
+ - Le schéma SQLite est normalisé pour stocker correctement les commandes et leurs lignes.
 
-### Configuration Stripe (Client)
-Dans `client/App.tsx`, mettre à jour la clé publique Stripe :
-```typescript
-const stripePK = "pk_test_votre_cle_publique_stripe";
-```
+ Auteurs & Licence
+ ------------------
+ Auteur : Papa Thiam
+ Projet : M2 — Programmation Mobile
 
-## API Endpoints
-
-- `GET /items/` - Liste des produits
-- `POST /items/` - Créer un produit
-- `GET /items/barcode/{code}` - Rechercher par code-barres
-- `POST /payments/` - Créer un paiement Stripe
-- `GET /docs` - Documentation Swagger
-
-## Utilisation
-
-1. **Lancer le serveur** : `cd server && docker-compose up`
-2. **Lancer l'app mobile** : `cd client && npm run android`
-3. **Scanner un produit** ou l'ajouter manuellement
-4. **Gérer le panier** (quantités, suppression)
-5. **Effectuer un paiement** via Stripe
-6. **Consulter l'historique** des achats
-
-##  Problèmes Résolus
-
--  Migration des APIs Expo dépréciées
--  Configuration Java 17 pour Android
--  Correction des clés Stripe
--  Intégration SQLite moderne
--  Structure de données paiements Stripe
-
-##  Notes Techniques
-
-### Base de Données SQLite
-- Table `cart` : Articles du panier actuel
-- Table `history` : Historique des achats
-
-### Gestion des États
-- Context API pour le panier partagé
-- Persistance automatique en base
-- Synchronisation entre écrans
-
-### Paiements Stripe
-- Customer ID : `cus_TAbp6YpLSrRqOU`
-- Format des données : `{pending_items: [{id, amount}]}`
-- Gestion complète des erreurs
-
-## Auteur
-**Papa Thiam**
-> Projet M2 - Programmation Mobile
-
-**Status** : En cours de finalisation
+ Statut : en cours de finalisation

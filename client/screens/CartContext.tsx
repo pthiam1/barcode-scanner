@@ -63,14 +63,6 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
             price INTEGER, 
             quantity INTEGER
           );
-          -- legacy history table (kept for migration)
-          CREATE TABLE IF NOT EXISTS history (
-            id TEXT PRIMARY KEY, 
-            title TEXT, 
-            price INTEGER, 
-            quantity INTEGER, 
-            paid_at INTEGER
-          );
           -- new normalized schema: orders + order_items
           CREATE TABLE IF NOT EXISTS orders (
             order_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -96,8 +88,21 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
         //les contenus des tables
         const cartContents = await database.getAllAsync("SELECT * FROM cart;");
         console.log('Contenu de la table cart:', cartContents);
-        const historyContents = await database.getAllAsync("SELECT * FROM history;");
-        console.log('Contenu de la table history:', historyContents);
+        // Check if a legacy `history` table exists. If yes, read its rows and
+        // migrate them into the normalized orders/order_items schema. We don't
+        // create the legacy table anymore — it's only detected for migration.
+        let historyContents: any[] = [];
+        try {
+          const h = await database.getFirstAsync("SELECT name FROM sqlite_master WHERE type='table' AND name='history';") as any;
+          if (h && h.name === 'history') {
+            historyContents = await database.getAllAsync("SELECT * FROM history;");
+            console.log('Contenu de la table history:', historyContents);
+          } else {
+            console.log('No legacy history table found');
+          }
+        } catch (err) {
+          console.log('Erreur vérification table history (ignorée) :', err);
+        }
 
         // If there are rows in legacy history but orders table is empty, migrate
         const ordersCount = await database.getFirstAsync('SELECT COUNT(*) as c FROM orders;') as {c: number};
@@ -131,6 +136,9 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
 
               await database.runAsync('COMMIT;');
             }
+
+            // After successful migration, drop legacy table to avoid confusion
+            try { await database.runAsync('DROP TABLE IF EXISTS history;'); console.log('Legacy history table dropped after migration'); } catch (_) {}
 
             console.log('Migration complete');
           } catch (mErr) {
@@ -264,9 +272,19 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
       const cartItems = await db.getAllAsync('SELECT * FROM cart;');
       console.log('Panier actuel:', cartItems);
       
-      // Contenu de l'historique
-      const historyItems = await db.getAllAsync('SELECT * FROM history;');
-      console.log('Legacy history rows:', historyItems);
+      // Contenu de l'historique (legacy) — vérifier d'abord que la table existe
+      let historyItems: any[] = [];
+      try {
+        const h = await db.getFirstAsync("SELECT name FROM sqlite_master WHERE type='table' AND name='history';") as any;
+        if (h && h.name === 'history') {
+          historyItems = await db.getAllAsync('SELECT * FROM history;');
+          console.log('Legacy history rows:', historyItems);
+        } else {
+          console.log('Legacy history table not present');
+        }
+      } catch (err) {
+        console.log('Erreur lecture legacy history (ignorée):', err);
+      }
 
       // New normalized tables
       try {
@@ -279,8 +297,9 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
       }
       
       // Statistiques
-      const cartCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM cart;') as {count: number};
-  const historyCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM history;') as {count: number};
+    const cartCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM cart;') as {count: number};
+    let historyCount = {count: 0} as {count: number};
+    try { historyCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM history;') as {count: number}; } catch (_) { /* ignore if table missing */ }
   let ordersCount = {count: 0} as {count: number};
   try { ordersCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM orders;') as {count: number}; } catch (_) {}
       
@@ -355,10 +374,15 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
       await database.runAsync('BEGIN TRANSACTION;');
       await database.runAsync('DELETE FROM order_items;');
       await database.runAsync('DELETE FROM orders;');
-      // optional: clear legacy history too
-      try { await database.runAsync('DELETE FROM history;'); } catch (_) {}
+      // optional: clear legacy history if present
+      try {
+        const h = await database.getFirstAsync("SELECT name FROM sqlite_master WHERE type='table' AND name='history';") as any;
+        if (h && h.name === 'history') {
+          await database.runAsync('DELETE FROM history;');
+        }
+      } catch (_) { /* ignore */ }
       await database.runAsync('COMMIT;');
-      console.log('🗑️ Historique vidé (orders + order_items + legacy history)');
+      console.log('🗑️ Historique vidé (orders + order_items)');
     } catch (error) {
       console.error('Erreur vidage historique:', error);
       try { const database = await ensureDb(); await database.runAsync('ROLLBACK;'); } catch (_) {}
