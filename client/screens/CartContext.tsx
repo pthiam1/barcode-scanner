@@ -336,13 +336,19 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
   };
 
   const clearHistory = async () => {
-    if (!db) return;
-
     try {
-      await db.runAsync('DELETE FROM history;');
-      console.log('🗑️ Historique vidé');
+      const database = await ensureDb();
+      // delete normalized tables
+      await database.runAsync('BEGIN TRANSACTION;');
+      await database.runAsync('DELETE FROM order_items;');
+      await database.runAsync('DELETE FROM orders;');
+      // optional: clear legacy history too
+      try { await database.runAsync('DELETE FROM history;'); } catch (_) {}
+      await database.runAsync('COMMIT;');
+      console.log('🗑️ Historique vidé (orders + order_items + legacy history)');
     } catch (error) {
       console.error('Erreur vidage historique:', error);
+      try { const database = await ensureDb(); await database.runAsync('ROLLBACK;'); } catch (_) {}
       throw error;
     }
   };

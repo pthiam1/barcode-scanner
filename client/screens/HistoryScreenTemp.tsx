@@ -8,11 +8,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCart } from './CartContext';
 
 interface HistoryItem {
-  id: number;
-  date: string;
-  total: number;
+  id: number; // order_id
+  paid_at: number;
+  // total stored in cents
+  price: number;
   items: Array<{
-    name: string;
+    product_id?: string;
+    title: string;
     price: number;
     quantity: number;
   }>;
@@ -22,39 +24,22 @@ export default function HistoryScreen({ navigation }: any) {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
   const { getHistory, clearHistory } = useCart();
 
   const loadHistory = async () => {
     try {
       // Récupérer l'historique via le CartContext
-      const historyItems = await getHistory();
-      
-      // Grouper les lignes de la table `history` par timestamp `paid_at` -> chaque paiement devient une commande
-      if (historyItems.length > 0) {
-        const groups: { [paidAt: number]: any[] } = {};
-
-        historyItems.forEach((row: any) => {
-          const paidAt = row.paid_at ? Number(row.paid_at) : Date.now();
-          if (!groups[paidAt]) groups[paidAt] = [];
-          groups[paidAt].push(row);
-        });
-
-        // Construire HistoryItem[] à partir des groupes, triés par paid_at descendant
-        const historyData: HistoryItem[] = Object.keys(groups)
-          .map(key => {
-            const paidAt = Number(key);
-            const rows = groups[paidAt];
-            const total = rows.reduce((sum: number, r: any) => sum + (r.price * r.quantity), 0);
-            return {
-              id: paidAt,
-              date: new Date(paidAt).toLocaleDateString('fr-FR', {
-                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-              }),
-              total,
-              items: rows.map((r: any) => ({ name: r.title, price: r.price, quantity: r.quantity }))
-            } as HistoryItem;
-          })
-          .sort((a, b) => Number(b.id) - Number(a.id));
+      const orders = await getHistory();
+      if (orders && orders.length > 0) {
+        const historyData: HistoryItem[] = (orders as any[])
+          .map(o => ({
+            id: Number(o.id),
+            paid_at: Number(o.paid_at),
+            price: o.price ?? o.total,
+            items: (o.items || []).map((it: any) => ({ product_id: it.product_id, title: it.title || it.name, price: it.price, quantity: it.quantity }))
+          }))
+          .sort((a, b) => Number(b.paid_at) - Number(a.paid_at));
 
         setHistory(historyData);
       } else {
@@ -90,20 +75,23 @@ export default function HistoryScreen({ navigation }: any) {
   const renderHistoryItem = ({ item }: { item: HistoryItem }) => (
     <View style={styles.historyItem}>
       <View style={styles.historyHeader}>
-        <Text style={styles.historyDate}>{item.date}</Text>
-        <Text style={styles.historyTotal}>{(item.total / 100).toFixed(2)} FCFA</Text>
+        <TouchableOpacity onPress={() => setExpandedOrder(expandedOrder === item.id ? null : item.id)} style={{flex:1}}>
+          <Text style={styles.historyDate}>{new Date(item.paid_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</Text>
+        </TouchableOpacity>
+        <Text style={styles.historyTotal}>{(item.price / 100).toFixed(2)} FCFA</Text>
       </View>
-      
-      <View style={styles.itemsList}>
-        {item.items.map((product, index) => (
-          <View key={index} style={styles.productItem}>
-            <Text style={styles.productName}>{product.name}</Text>
-            <Text style={styles.productDetails}>
-              {product.quantity}x {(product.price / 100).toFixed(2)} FCFA
-            </Text>
-          </View>
-        ))}
-      </View>
+      {expandedOrder === item.id ? (
+        <View style={styles.itemsList}>
+          {item.items.map((product, index) => (
+            <View key={index} style={styles.productItem}>
+              <Text style={styles.productName}>{product.title}</Text>
+              <Text style={styles.productDetails}>
+                {product.quantity}x {(product.price / 100).toFixed(2)} FCFA
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 
