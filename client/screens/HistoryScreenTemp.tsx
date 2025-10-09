@@ -29,39 +29,33 @@ export default function HistoryScreen({ navigation }: any) {
       // Récupérer l'historique via le CartContext
       const historyItems = await getHistory();
       
-      // Grouper les items par date de paiement si on a plusieurs achats
-      // Pour simplifier, on va créer une "commande" par groupe d'items
+      // Grouper les lignes de la table `history` par timestamp `paid_at` -> chaque paiement devient une commande
       if (historyItems.length > 0) {
-        // Créer des groupes de 5 minutes pour regrouper les achats proches
-        const groupedHistory: { [key: string]: any[] } = {};
-        
-        historyItems.forEach((item: any) => {
-          // Utiliser une clé temporelle pour grouper les achats proches
-          const timeKey = Math.floor(Date.now() / (5 * 60 * 1000)).toString(); // Groupes de 5 minutes
-          if (!groupedHistory[timeKey]) {
-            groupedHistory[timeKey] = [];
-          }
-          groupedHistory[timeKey].push(item);
+        const groups: { [paidAt: number]: any[] } = {};
+
+        historyItems.forEach((row: any) => {
+          const paidAt = row.paid_at ? Number(row.paid_at) : Date.now();
+          if (!groups[paidAt]) groups[paidAt] = [];
+          groups[paidAt].push(row);
         });
-        
-        // Pour simplifier, on va juste afficher tous les items comme une seule commande
-        const historyData: HistoryItem[] = [{
-          id: 1,
-          date: new Date().toLocaleDateString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }),
-          total: historyItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0),
-          items: historyItems.map((item: any) => ({
-            name: item.title,
-            price: item.price,
-            quantity: item.quantity
-          }))
-        }];
-        
+
+        // Construire HistoryItem[] à partir des groupes, triés par paid_at descendant
+        const historyData: HistoryItem[] = Object.keys(groups)
+          .map(key => {
+            const paidAt = Number(key);
+            const rows = groups[paidAt];
+            const total = rows.reduce((sum: number, r: any) => sum + (r.price * r.quantity), 0);
+            return {
+              id: paidAt,
+              date: new Date(paidAt).toLocaleDateString('fr-FR', {
+                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+              }),
+              total,
+              items: rows.map((r: any) => ({ name: r.title, price: r.price, quantity: r.quantity }))
+            } as HistoryItem;
+          })
+          .sort((a, b) => Number(b.id) - Number(a.id));
+
         setHistory(historyData);
       } else {
         setHistory([]);

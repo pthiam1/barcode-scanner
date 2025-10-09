@@ -213,7 +213,7 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
     if (!db) return [];
 
     try {
-      const result = await db.getAllAsync('SELECT id, title, price, quantity FROM history ORDER BY paid_at DESC;');
+      const result = await db.getAllAsync('SELECT id, title, price, quantity, paid_at FROM history ORDER BY paid_at DESC;');
       return result as Item[];
     } catch (error) {
       console.error('Erreur récupération historique:', error);
