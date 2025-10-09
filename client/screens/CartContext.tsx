@@ -266,13 +266,26 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({children}) 
       
       // Contenu de l'historique
       const historyItems = await db.getAllAsync('SELECT * FROM history;');
-      console.log('Historique:', historyItems);
+      console.log('Legacy history rows:', historyItems);
+
+      // New normalized tables
+      try {
+        const orders = await db.getAllAsync('SELECT * FROM orders ORDER BY paid_at DESC;');
+        console.log('Orders:', orders);
+        const orderItems = await db.getAllAsync('SELECT * FROM order_items ORDER BY order_id DESC;');
+        console.log('Order items:', orderItems);
+      } catch (err) {
+        console.log('No orders/order_items tables or error reading them:', err);
+      }
       
       // Statistiques
       const cartCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM cart;') as {count: number};
-      const historyCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM history;') as {count: number};
+  const historyCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM history;') as {count: number};
+  let ordersCount = {count: 0} as {count: number};
+  try { ordersCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM orders;') as {count: number}; } catch (_) {}
       
       console.log(`Statistiques: ${cartCount.count} items dans le panier, ${historyCount.count} dans l'historique`);
+  console.log(`Statistiques: orders=${ordersCount.count}`);
     } catch (error) {
       console.error('Erreur debug DB:', error);
     }

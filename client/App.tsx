@@ -3,6 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { CartProvider } from './screens/CartContext';
+import ThemeProvider, { useTheme } from './theme/ThemeProvider';
+import ThemeToggle from './theme/ThemeToggle';
 
 // Screens
 import HomeScreen from './screens/HomeScreen';
@@ -27,86 +29,42 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function App() {
-  const stripePK = "pk_test_51SCghjFkVodeSW3Lkof2XBmSwuLp9gefjjO7VWbAg1qXI9HzhQLNL1cIy9iNofUZm1KD9bsbmiYEiDyJKm4G757S00FU0JtX5Y";
-  
+  const stripePK = 'pk_test_51SCghjFkVodeSW3Lkof2XBmSwuLp9gefjjO7VWbAg1qXI9HzhQLNL1cIy9iNofUZm1KD9bsbmiYEiDyJKm4G757S00FU0JtX5Y';
+
   return (
-    <CartProvider>
-      <StripeProvider
-        publishableKey={stripePK}
-        merchantIdentifier="merchant.com.example"
-      >
-        <NavigationContainer>
-          <Stack.Navigator
-            initialRouteName="Home"
-            screenOptions={{
-              headerStyle: {
-                backgroundColor: '#4CAF50',
-              },
-              headerTintColor: '#fff',
-              headerTitleStyle: {
-                fontWeight: 'bold',
-              },
-            }}
-          >
-            <Stack.Screen 
-              name="Home" 
-              component={HomeScreen}
-              options={{ 
-                title: 'AfricaMarket',
-                headerShown: false 
-              }}
-            />
-            <Stack.Screen 
-              name="Scan" 
-              component={BarcodeScreen}
-              options={{ 
-                title: 'Scanner un produit',
-                headerBackTitle: 'Retour'
-              }}
-            />
-            <Stack.Screen 
-              name="ManualAdd" 
-              component={ManualAddScreen}
-              options={{ 
-                title: 'Ajouter manuellement',
-                headerBackTitle: 'Retour'
-              }}
-            />
-            <Stack.Screen 
-              name="Cart" 
-              component={CartScreen}
-              options={{ 
-                title: 'Mon Panier',
-                headerShown: false
-              }}
-            />
-            <Stack.Screen 
-              name="History" 
-              component={HistoryScreen}
-              options={{ 
-                title: 'Historique des achats',
-                headerShown: false
-              }}
-            />
-            <Stack.Screen 
-              name="PayScreen" 
-              component={PayScreen}
-              options={{ 
-                title: 'Paiement',
-                headerShown: false
-              }}
-            />
-            <Stack.Screen 
-              name="Checkout" 
-              component={CheckoutScreen}
-              options={{ 
-                title: 'Paiement',
-                headerBackTitle: 'Panier'
-              }}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </StripeProvider>
-    </CartProvider>
+    <ThemeProvider>
+      <CartProvider>
+        <StripeProvider publishableKey={stripePK} merchantIdentifier="merchant.com.example">
+          <AppNavigator />
+        </StripeProvider>
+      </CartProvider>
+    </ThemeProvider>
   );
 }
+
+const AppNavigator: React.FC = () => {
+  const { colors } = useTheme();
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="Home"
+        screenOptions={{
+          headerStyle: { backgroundColor: String(colors.card) },
+          headerTintColor: String(colors.text),
+          headerTitleStyle: { fontWeight: 'bold' },
+          headerRight: () => <ThemeToggle />,
+        }}
+      >
+        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'AfricaMarket', headerShown: false }} />
+        <Stack.Screen name="Scan" component={BarcodeScreen} options={{ title: 'Scanner un produit', headerBackTitle: 'Retour' }} />
+        <Stack.Screen name="ManualAdd" component={ManualAddScreen} options={{ title: 'Ajouter manuellement', headerBackTitle: 'Retour' }} />
+        <Stack.Screen name="Cart" component={CartScreen} options={{ title: 'Mon Panier', headerShown: false }} />
+        <Stack.Screen name="History" component={HistoryScreen} options={{ title: 'Historique des achats', headerShown: false }} />
+        <Stack.Screen name="PayScreen" component={PayScreen} options={{ title: 'Paiement', headerShown: false }} />
+        <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ title: 'Paiement', headerBackTitle: 'Panier' }} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+

@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCart } from './CartContext';
+import { useTheme } from '../theme/ThemeProvider';
 
 type CartItem = {
   id: string;
@@ -24,6 +25,7 @@ type CartItem = {
 
 export default function CartScreen({ navigation }: any) {
   const { items, setQuantity, removeItem, clearCart, moveCartToHistory } = useCart();
+  const { colors } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
 
   const formatPrice = (priceInCents: number) => {
@@ -116,15 +118,15 @@ export default function CartScreen({ navigation }: any) {
 
   if (items.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Panier</Text>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={[styles.header, { backgroundColor: String(colors.card), borderBottomColor: String(colors.border) }]}>
+          <Text style={[styles.title, { color: colors.text }]}>Panier</Text>
         </View>
         
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Votre panier est vide</Text>
+          <Text style={[styles.emptyText, { color: colors.muted }]}>Votre panier est vide</Text>
           <TouchableOpacity 
-            style={styles.scanButton}
+            style={[styles.scanButton, { backgroundColor: String(colors.primary) }]}
             onPress={() => navigation.navigate('Scan')}
           >
             <Text style={styles.scanButtonText}>Scanner un produit</Text>
@@ -135,14 +137,14 @@ export default function CartScreen({ navigation }: any) {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Panier ({items.length} articles)</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: String(colors.card), borderBottomColor: String(colors.border) }]}>
+        <Text style={[styles.title, { color: colors.text }]}>Panier ({items.length} articles)</Text>
         <View style={styles.headerButtons}>
-          <TouchableOpacity onPress={() => navigation.navigate('History')} style={styles.historyButton}>
+          <TouchableOpacity onPress={() => navigation.navigate('History')} style={[styles.historyButton, { backgroundColor: String(colors.primary) }] }>
             <Text style={styles.historyButtonText}>Historique</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleClearCart} style={styles.clearButton}>
+          <TouchableOpacity onPress={handleClearCart} style={[styles.clearButton, { backgroundColor: '#ff4444' }] }>
             <Text style={styles.clearButtonText}>Vider</Text>
           </TouchableOpacity>
         </View>
@@ -159,13 +161,13 @@ export default function CartScreen({ navigation }: any) {
         showsVerticalScrollIndicator={false}
       />
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: String(colors.card), borderTopColor: String(colors.border) }]}>
         <View style={styles.totalContainer}>
-          <Text style={styles.totalLabel}>Total:</Text>
-          <Text style={styles.totalAmount}>{formatPrice(getTotalPrice())}</Text>
+          <Text style={[styles.totalLabel, { color: colors.text }]}>Total:</Text>
+          <Text style={[styles.totalAmount, { color: colors.primary }]}>{formatPrice(getTotalPrice())}</Text>
         </View>
         
-        <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout}>
+        <TouchableOpacity style={[styles.checkoutButton, { backgroundColor: String(colors.primary) }]} onPress={handleCheckout}>
           <Text style={styles.checkoutButtonText}>Passer commande</Text>
         </TouchableOpacity>
       </View>

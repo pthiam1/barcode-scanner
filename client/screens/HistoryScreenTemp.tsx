@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCart } from './CartContext';
+import { useTheme } from '../theme/ThemeProvider';
 
 interface HistoryItem {
   id: number; // order_id
@@ -21,6 +22,7 @@ interface HistoryItem {
 }
 
 export default function HistoryScreen({ navigation }: any) {
+  const { colors } = useTheme();
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -104,11 +106,11 @@ export default function HistoryScreen({ navigation }: any) {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Historique des achats</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}> 
+      <View style={[styles.header, { backgroundColor: String(colors.card), borderBottomColor: String(colors.border) }] }>
+        <Text style={[styles.title, { color: colors.text }]}>Historique des achats</Text>
         {history.length > 0 && (
-          <TouchableOpacity onPress={handleClearHistory} style={styles.clearButton}>
+          <TouchableOpacity onPress={handleClearHistory} style={[styles.clearButton, { backgroundColor: '#ff4444' }]}>
             <Text style={styles.clearButtonText}>Vider</Text>
           </TouchableOpacity>
         )}
@@ -116,8 +118,8 @@ export default function HistoryScreen({ navigation }: any) {
       
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2196F3" />
-          <Text style={styles.loadingText}>Chargement...</Text>
+          <ActivityIndicator size="large" color={String(colors.primary)} />
+          <Text style={[styles.loadingText, { color: colors.muted }]}>Chargement...</Text>
         </View>
       ) : (
         <FlatList
@@ -133,9 +135,9 @@ export default function HistoryScreen({ navigation }: any) {
         />
       )}
       
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: String(colors.card), borderTopColor: String(colors.border) }] }>
         <TouchableOpacity 
-          style={styles.button}
+          style={[styles.button, { backgroundColor: String(colors.primary) }]}
           onPress={() => navigation.goBack()}
         >
           <Text style={styles.buttonText}>Retour</Text>

@@ -13,25 +13,31 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCart } from '../screens/CartContext';
+import { useTheme } from '../theme/ThemeProvider';
+import ThemeToggle from '../theme/ThemeToggle';
 
 export default function HomeScreen({ navigation }: any) {
   const { debugDatabase } = useCart();
+  const { colors } = useTheme();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}> 
         <View style={styles.header}>
           {/* logo : place un fichier logo.png dans /assets et adapte require */}
           <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode="contain" />
-          <Text style={styles.title}>AfricaMarket</Text>
-          <Text style={styles.subtitle}>Scan · Panier · Payer</Text>
+          <Text style={[styles.title, { color: colors.primary }]}>AfricaMarket</Text>
+          <Text style={[styles.subtitle, { color: colors.muted }]}>Scan · Panier · Payer</Text>
+          <View style={{ position: 'absolute', right: 12, top: 12 }}>
+            <ThemeToggle />
+          </View>
         </View>
 
 
 
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.actionCard} onPress={() => navigation.navigate('ManualAdd')}>
-            <Text style={styles.actionTitle}>Ajouter un produit manuellement</Text>
-            <Text style={styles.actionSubtitle}>Saisir code-barres, nom et prix</Text>
+          <TouchableOpacity style={[styles.actionCard, { backgroundColor: String(colors.card), borderColor: String(colors.border) }]} onPress={() => navigation.navigate('ManualAdd')}>
+            <Text style={[styles.actionTitle, { color: colors.text }]}>Ajouter un produit manuellement</Text>
+            <Text style={[styles.actionSubtitle, { color: colors.muted }]}>Saisir code-barres, nom et prix</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.actionCard} onPress={() => navigation.navigate('Scan')}>
@@ -44,9 +50,9 @@ export default function HomeScreen({ navigation }: any) {
             <Text style={styles.actionSubtitle}>Consulter / modifier / payer</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.actionCard, { backgroundColor: '#e8f5e8' }]} onPress={() => navigation.navigate('PayScreen')}>
-            <Text style={[styles.actionTitle, { color: '#2e7d2e' }]}>💳 Paiement rapide</Text>
-            <Text style={[styles.actionSubtitle, { color: '#2e7d2e' }]}>Payer directement sans passer par le panier</Text>
+          <TouchableOpacity style={[styles.actionCard, { backgroundColor: String(colors.card), borderColor: String(colors.border) }]} onPress={() => navigation.navigate('PayScreen')}>
+            <Text style={[styles.actionTitle, { color: colors.primary }]}>💳 Paiement rapide</Text>
+            <Text style={[styles.actionSubtitle, { color: colors.muted }]}>Payer directement sans passer par le panier</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionCard} onPress={() => navigation.navigate('History')}>
@@ -54,12 +60,12 @@ export default function HomeScreen({ navigation }: any) {
             <Text style={styles.actionSubtitle}>Voir les achats précédents</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.actionCard, { backgroundColor: '#eee' }]} onPress={async () => {
+          <TouchableOpacity style={[styles.actionCard, { backgroundColor: String(colors.card), borderColor: String(colors.border) }]} onPress={async () => {
             await debugDatabase();
             Alert.alert('Debug', 'Vérifie la console Metro pour les logs DB.');
           }}>
-            <Text style={styles.actionTitle}>Log DB (debug)</Text>
-            <Text style={styles.actionSubtitle}>Affiche le contenu DB dans la console</Text>
+            <Text style={[styles.actionTitle, { color: colors.text }]}>Log DB (debug)</Text>
+            <Text style={[styles.actionSubtitle, { color: colors.muted }]}>Affiche le contenu DB dans la console</Text>
           </TouchableOpacity>
         </View>
 

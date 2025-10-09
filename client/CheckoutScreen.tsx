@@ -1,9 +1,10 @@
 import { useStripe } from "@stripe/stripe-react-native";
 import Constants from "expo-constants";
 import React, { useEffect, useState } from "react";
-import { Alert, Text, Button} from "react-native";
+import { Alert, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCart } from "./screens/CartContext";
+import { useTheme } from './theme/ThemeProvider';
 
 
 export default function CheckoutScreen() {
@@ -11,6 +12,7 @@ export default function CheckoutScreen() {
     const [loading, setLoading] = useState(false);
     const [paymentIntentId, setPaymentIntentId] = useState<string>("");
     const { items, moveCartToHistory } = useCart();
+    const { colors } = useTheme();
 
     const apiUrl = "http://192.168.0.23:8000"; 
     const userId = "cus_T8z0MLLNC5khnY";
@@ -98,13 +100,19 @@ export default function CheckoutScreen() {
     }, []);
 
     return (
-        <SafeAreaView>
-            <Text>Payment</Text>
-            <Button
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background, padding: 20 }}>
+            <Text style={{ color: colors.text, fontSize: 18, marginBottom: 12 }}>Payment</Text>
+            <TouchableOpacity
                 disabled={!loading}
-                title="Checkout"
+                style={[styles.btn, { backgroundColor: loading ? String(colors.primary) : '#999' }]}
                 onPress={openPaymentSheet}
-            />
+            >
+                <Text style={{ color: '#fff', fontWeight: '700' }}>Checkout</Text>
+            </TouchableOpacity>
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+  btn: { padding: 16, borderRadius: 10, alignItems: 'center' }
+});

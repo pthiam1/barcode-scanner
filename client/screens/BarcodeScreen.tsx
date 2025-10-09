@@ -114,7 +114,7 @@ export default function BarcodeScreen({ navigation }: any) {
       </View>
 
       <View style={styles.bottomHalf}>
-        <View style={styles.bottomContent}>
+        <View style={styles.bottomContent}>939297
           <View style={styles.manualRow}>
             <TextInput
               placeholder="Entrer code-barres"
