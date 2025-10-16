@@ -13,14 +13,14 @@ export default function BarcodeScreen({ navigation }: any) {
   const [manualBarcode, setManualBarcode] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const { addItem } = useCart();
-  const apiUrl = 'http://172.26.4.134:8000'; // Remplace par l'IP de ton backend
+  const apiUrl = 'http://192.168.0.23:8000'; // Remplace par l'IP de ton backend
   const [lastAdded, setLastAdded] = useState<string | null>(null);
 
   const shift = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     let showSub: EmitterSubscription | null = null;
-    let hideSub: EmitterSubscription | null = null;
+    let hideSub: EmitterSubscription | null  = null;
 
     const onKeyboardShow = (e: any) => {
       const height = e.endCoordinates ? e.endCoordinates.height : 250;

@@ -47,7 +47,7 @@ const AppNavigator: React.FC = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator
+      <Stack.Navigator id={undefined}
         initialRouteName="Home"
         screenOptions={{
           headerStyle: { backgroundColor: String(colors.card) },

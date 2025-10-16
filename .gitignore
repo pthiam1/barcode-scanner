@@ -1,1 +1,5 @@
 node_modules
+
+# ignore the .env file for environment variables
+.env
+
