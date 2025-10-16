@@ -2,125 +2,133 @@
 
 Ce projet de TP académique en M2 vise à développer une application mobile de  électronique avec scanner de code-barres ou ajout manuel de produits, gestion de panier, et paiements via Stripe. L'application est construite avec React Native pour le frontend et FastAPI pour le backend.
 
+
+
 ## Principales fonctionnalités
- ---------------------------
- - Scanner de code‑barres avec la caméra (ou saisie manuelle)
- - Ajout automatique d'un produit au panier après lecture
- - Gestion du panier (quantités, suppression, vider)
- - Paiements via Stripe (PaymentSheet)
- - Historique des commandes (persisté en SQLite)
- - Mode Jour / Nuit global (toggle) — thème persistant
- - Persistance locale via SQLite (cart, orders, order_items)
+
+- Scanner de code‑barres via la caméra (ou saisie manuelle)
+- Ajout automatique d'un produit au panier après lecture
+- Ajout manuel avec presets rapides
+- Gestion complète du panier (quantités, suppression)
+- Paiement via Stripe PaymentSheet (client + backend)
+- Historique des commandes persisté en SQLite (tables `orders` + `order_items`)
+- Thème global Jour / Nuit + persistance
+
+---
+
+## Aperçus (captures d'écran)
+
+Voici quelques captures d'écran extraites du dossier `client/assets/` pour te donner une idée :
+
+<div style="display: flex; gap: 16px; margin-bottom: 16px;">
+	<img src="./client/assets/Screenshot_20251004_143018.png" alt="Accueil" width="30%" />
+	<img src="./client/assets/Screenshot_20251004_143052.png" alt="Scanner" width="30%" />
+	<img src="./client/assets/Screenshot_20251004_144056.png" alt="Ajout manuel" width="30%" />
+</div>
+<div style="display: flex; gap: 16px; margin-bottom: 16px;">
+	<img src="./client/assets/Screenshot_20251004_144305.png" alt="Panier" width="30%" />
+	<img src="./client/assets/Screenshot_20251004_144420.png" alt="Paiement" width="30%" />
+	<img src="./client/assets/Screenshot_20251004_144633.png" alt="Historique" width="30%" />
+</div>
+<div style="display: flex; gap: 16px;">
+	<img src="./client/assets/Screenshot_20251004_144647.png" alt="Liste produits" width="30%" />
+	<img src="./client/assets/Screenshot_20251004_150631.png" alt="Détails produit" width="30%" />
+</div>
+
+---
 
 ## Structure du projet
- -------------------
- barcode-scanner/
- - client/       -> Application React Native (Expo)
-	 - screens/    -> Écrans de l'application
-	 - theme/      -> ThemeProvider + toggle (jour/nuit)
-	 - assets/     -> Images et ressources (icônes, screenshots)
- - server/       -> API FastAPI (endpoints produits / paiements)
- - Code-barre/   -> Outils / scripts utilitaires pour générer des codes
 
- Prérequis
- ---------
- - Node.js LTS
- - Yarn ou npm
- - Expo CLI (optionnel mais recommandé)
- - Android Studio / Xcode ou un appareil réel
- - Python 3.8+ (pour le backend)
- - Compte Stripe pour tests (clé publique + clé secrète)
+```
+barcode-scanner/
+├─ client/        # React Native (Expo)
+│  ├─ assets/      # images et icônes
+│  ├─ screens/     # écrans (Barcode, Cart, History, ...)
+│  └─ theme/       # ThemeProvider + toggle
+├─ server/        # FastAPI (produits, paiements)
+└─ Code-barre/    # scripts utilitaires
+```
 
- Installation et exécution
- -------------------------
- 1) Backend
+## Prérequis
 
- Ouvrir un terminal et lancer le backend (depuis `server/`). Exemples :
+- Node.js LTS
+- npm ou yarn
+- Expo CLI (optionnel mais pratique)
+- Android Studio/Xcode ou un appareil mobile
+- Python 3.8+ (backend)
+- Compte Stripe (clé de test)
 
- - Avec Docker (recommandé si disponible) :
+## Installation & exécution (rapide)
 
- ```bash
- cd server
- sudo docker compose up --build
- ```
+1) Backend
 
- - Sans Docker (local) :
+```bash
+cd server
+# avec Docker
+docker compose logs -f
+docker compose up --build
 
- ```bash
- cd server
- python -m venv .venv
- source .venv/bin/activate
- pip install -r requirements.txt
- uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
- ```
+```
 
- 2) Frontend (client)
+2) Frontend
 
- ```bash
- cd client
- npm install
- # Lancer sur Android (ou utiliser Expo dev tools)
- npm run android
- ```
+```bash
+cd client
+npm install
+# Lancer sur Android (ou via Expo devtools)
+npm run android
+```
 
- Remarques réseau :
- - Si le serveur est lancé en local sur une machine différente (même réseau), mettez à jour l'URL `apiUrl` dans les écrans (par ex. `client/screens/BarcodeScreen.tsx` et `client/CheckoutScreen.tsx`) pour pointer vers l'adresse IP du serveur.
+### Remarques réseau
 
- Configuration Stripe
- --------------------
- - Définissez les clés Stripe dans le backend (fichier `.env` à la racine de `server/`) :
+Si le backend tourne sur une autre machine du réseau local, met à jour la constante `apiUrl` dans `client/screens/*` pour pointer vers l'IP/port du serveur.
 
- ```
- STRIPE_SK=sk_test_xxx
- STRIPE_PK=pk_test_xxx
- ```
+## Configuration Stripe
 
- - Dans `client/App.tsx` la clé publique est utilisée pour initialiser Stripe : remplacez la clé de test par la vôtre lorsque nécessaire.
+Définis les clés dans le backend (`.env`):
 
- Base de données locale (SQLite)
- -------------------------------
- Le frontend utilise SQLite pour persister :
- - `cart` : articles actuellement dans le panier
- - `orders` : chaque commande payée (order_id, paid_at, total)
- - `order_items` : lignes de chaque commande (product_id, title, price, quantity)
+```
+STRIPE_SK=sk_test_xxx
+STRIPE_PK=pk_test_xxx
+```
 
- Lors du paiement validé, le panier est converti en `orders` + `order_items` (transactionnel) puis vidé.
+Dans `client/App.tsx`, remplace la clé publique de test par la tienne pour tester les paiements.
 
- API exposées côté backend (exemples)
- -------------------------------------
- - GET /items/                 — liste produits
- - POST /items/                — créer produit
- - GET /items/barcode/{code}   — récupérer produit par code‑barres
- - POST /payments/             — créer session / payment intent pour Stripe
- - POST /payments/check/{id}   — vérifier statut paiement (optionnel)
+## Base de données locale (SQLite)
 
- Design & theming
- -----------------
- - Un `ThemeProvider` expose `useTheme()` qui fournit :
-	 - `theme` : 'light' | 'dark'
-	 - `colors` : palette (background, card, text, primary, border, muted)
-	 - `toggleTheme()` : bascule et persistance via AsyncStorage
- - Le toggle est accessible depuis le header et depuis l'écran d'accueil.
+Le client utilise SQLite (expo-sqlite) et les tables :
 
- Conseils de développement
- -------------------------
- - Lancer `npx tsc --noEmit` dans le dossier `client` permet de vérifier les erreurs TypeScript sans lancer l'application.
- - Utiliser les logs (Metro / console du backend) pour diagnostiquer les appels API et erreurs SQLite.
+- `cart` (panier actuel)
+- `orders` (commandes payées)
+- `order_items` (lignes de commandes)
 
- Dépannage courant
- -----------------
- - Erreur caméra : vérifier les permissions et l'état de `Camera.requestCameraPermissionsAsync()`.
- - Erreur de connexion au backend : vérifier l'URL `apiUrl` et le pare‑feu/local network.
- - Erreur Stripe : vérifier vos clés et les logs du backend.
+Lors d'un paiement validé, le panier est transformé en `orders` + `order_items` dans une transaction.
 
- Notes techniques
- ----------------
- - Le panier utilise un contexte React (`CartContext`) pour exposer : `items`, `addItem`, `removeItem`, `setQuantity`, `clearCart`, `saveCart`, `loadCart`, `getHistory`, `moveCartToHistory`, `clearHistory`.
- - Le schéma SQLite est normalisé pour stocker correctement les commandes et leurs lignes.
+## Endpoints backend (exemples)
 
- Auteurs & Licence
- ------------------
- Auteur : Papa Thiam
- Projet : M2 — Programmation Mobile
+- GET /items/                 — liste des produits
+- POST /items/                — créer un produit
+- GET /items/barcode/{code}   — récupérer produit par code‑barres
+- POST /payments/             — initier un paiement (backend)
 
- Statut : en cours de finalisation
+---
+
+
+## Conseils de développement
+
+- Vérifier les types : `npx tsc --noEmit` (depuis le dossier `client`)
+- Utiliser les logs Metro / backend pour déboguer les appels réseau et la DB
+
+## Dépannage
+
+- Erreur caméra : vérifier les permissions (Camera.requestCameraPermissionsAsync()).
+- Erreur backend : vérifier `apiUrl` et le réseau local.
+- Erreur Stripe : vérifier clés et logs backend.
+
+---
+
+## Auteurs & Licence
+
+Auteur : Papa Thiam — Projet M2 Programmation Mobile
+
+Statut : en cours de finalisation
