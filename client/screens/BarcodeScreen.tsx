@@ -3,7 +3,8 @@
  * Fonctionnalité: Scanner de code-barres avec caméra, ajout automatique au panier via API backend, gestion des erreurs et navigation.
  */
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, Button, Alert, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Platform, Animated, Keyboard, EmitterSubscription } from 'react-native';
+import { View, Text, Button, Alert, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Animated, Keyboard, EmitterSubscription } from 'react-native';
+import AddProductCard from '../components/AddProductCard';
 import { CameraView, Camera } from 'expo-camera';
 import { useCart } from './CartContext';
 
@@ -14,6 +15,7 @@ export default function BarcodeScreen({ navigation }: any) {
   const [isAdding, setIsAdding] = useState(false);
   const [scannedItems, setScannedItems] = useState<Array<{ id: string; title: string; price: number; qty?: number }>>([]);
   const { addItem } = useCart();
+  const { setQuantity, removeItem } = useCart();
   const apiUrl = 'http://192.168.0.23:8000'; // Remplace par l'IP de ton backend
   const [lastAdded, setLastAdded] = useState<string | null>(null);
 
@@ -77,8 +79,14 @@ export default function BarcodeScreen({ navigation }: any) {
           price: product.price             // API renvoie price en centimes
         }, 1);
 
-          // ajouter à la liste de session
-          setScannedItems(prev => [{ id: product.id.toString(), title: product.name, price: product.price, qty: 1 }, ...prev]);
+          // ajouter à la liste de session (group by id)
+          setScannedItems(prev => {
+            const existing = prev.find(p => p.id === String(product.id));
+            if (existing) {
+              return prev.map(p => p.id === String(product.id) ? { ...p, qty: (p.qty ?? 1) + 1 } : p);
+            }
+            return [{ id: product.id.toString(), title: product.name, price: product.price, qty: 1 }, ...prev];
+          });
 
         Alert.alert('Ajouté', `${product.name} ajouté au panier`);
       } else if (res.status === 404) {
@@ -114,8 +122,14 @@ export default function BarcodeScreen({ navigation }: any) {
           title: product.name,
           price: product.price,
         }, 1);
-        // ajouter à la liste de session
-        setScannedItems(prev => [{ id: product.id.toString(), title: product.name, price: product.price, qty: 1 }, ...prev]);
+        // ajouter à la liste de session (group by id)
+        setScannedItems(prev => {
+          const existing = prev.find(p => p.id === String(product.id));
+          if (existing) {
+            return prev.map(p => p.id === String(product.id) ? { ...p, qty: (p.qty ?? 1) + 1 } : p);
+          }
+          return [{ id: product.id.toString(), title: product.name, price: product.price, qty: 1 }, ...prev];
+        });
 
         Alert.alert('Ajouté', `${product.name} ajouté au panier`);
         setManualBarcode('');
@@ -131,6 +145,31 @@ export default function BarcodeScreen({ navigation }: any) {
     } finally {
       setIsAdding(false);
     }
+  };
+
+  const incrementSessionItem = async (id: string) => {
+    // increment both in session list and in persistent cart
+    setScannedItems(prev => prev.map(p => p.id === id ? { ...p, qty: (p.qty ?? 1) + 1 } : p));
+    // also update persistent cart
+    try { await addItem({ id, title: '', price: 0 }, 1); } catch (_) {}
+  };
+
+  const decrementSessionItem = async (id: string) => {
+    setScannedItems(prev => {
+      const found = prev.find(p => p.id === id);
+      if (!found) return prev;
+      const newQty = (found.qty ?? 1) - 1;
+      if (newQty <= 0) {
+        // remove from session
+        return prev.filter(p => p.id !== id);
+      }
+      return prev.map(p => p.id === id ? { ...p, qty: newQty } : p);
+    });
+    // update persistent cart quantity
+    try {
+      // read current from CartContext.items via setQuantity; if quantity becomes 0 remove
+      await setQuantity(id, Math.max(0, (1)));
+    } catch (_) {}
   };
 
   if (hasPermission === null) return <Text>Demande d'accès caméra...</Text>;
@@ -158,25 +197,14 @@ export default function BarcodeScreen({ navigation }: any) {
 
       <Animated.View style={[styles.bottomHalf, { transform: [{ translateY: shift }] }] }>
         <View style={styles.bottomContent}>
-          <View style={styles.manualRow}>
-            <TextInput
-              placeholder="Entrer code-barres"
-              style={styles.manualInput}
-              value={manualBarcode}
-              onChangeText={setManualBarcode}
-              keyboardType="number-pad"
-              returnKeyType="done"
-              editable={!isAdding}
-              placeholderTextColor="#666"
+          <View>
+            <AddProductCard
+              barcode={manualBarcode}
+              onBarcodeChange={setManualBarcode}
+              onAdd={handleManualAdd}
+              isAdding={isAdding}
+              showNameAndPrice={false}
             />
-
-            <TouchableOpacity style={[styles.manualButton, styles.addButton]} onPress={handleManualAdd} disabled={isAdding}>
-              {isAdding ? <ActivityIndicator color="#fff" /> : <Text style={styles.manualButtonText}>Ajouter</Text>}
-            </TouchableOpacity>
-
-            <TouchableOpacity style={[styles.manualButton, styles.clearButton]} onPress={() => setManualBarcode('')} disabled={isAdding}>
-              <Text style={styles.manualButtonText}>Effacer</Text>
-            </TouchableOpacity>
           </View>
 
           <View style={styles.controlsRow}>
@@ -198,15 +226,28 @@ export default function BarcodeScreen({ navigation }: any) {
             {scannedItems.length === 0 ? (
               <Text style={styles.scannedEmpty}>Aucun article scanné</Text>
             ) : (
-              scannedItems.map(item => (
-                <View key={`${item.id}-${item.title}`} style={styles.scannedRow}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.scannedName}>{item.title}</Text>
-                    <Text style={styles.scannedPrice}>{(item.price / 100).toFixed(2)} FCFA</Text>
+              <Animated.FlatList
+                data={scannedItems}
+                keyExtractor={(it) => `${it.id}-${it.qty}`}
+                style={{ maxHeight: 140 }}
+                renderItem={({ item }) => (
+                  <View style={styles.scannedRow}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.scannedName}>{item.title}</Text>
+                      <Text style={styles.scannedPrice}>{(item.price / 100).toFixed(2)} FCFA</Text>
+                    </View>
+                    <View style={styles.qtyControls}>
+                      <TouchableOpacity style={styles.qtyBtn} onPress={() => decrementSessionItem(item.id)}>
+                        <Text style={styles.qtyBtnText}>−</Text>
+                      </TouchableOpacity>
+                      <Text style={styles.scannedQty}>{item.qty ?? 1}</Text>
+                      <TouchableOpacity style={styles.qtyBtn} onPress={() => incrementSessionItem(item.id)}>
+                        <Text style={styles.qtyBtnText}>+</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <Text style={styles.scannedQty}>x{item.qty ?? 1}</Text>
-                </View>
-              ))
+                )}
+              />
             )}
           </View>
         </View>
@@ -319,4 +360,7 @@ const styles = StyleSheet.create({
   scannedName: { fontWeight: '600' },
   scannedPrice: { fontSize: 12, color: '#666', marginTop: 4 },
   scannedQty: { marginLeft: 12, fontWeight: '700' },
+  qtyControls: { flexDirection: 'row', alignItems: 'center' },
+  qtyBtn: { width: 34, height: 34, borderRadius: 8, backgroundColor: '#eee', alignItems: 'center', justifyContent: 'center', marginHorizontal: 6 },
+  qtyBtnText: { fontSize: 18, fontWeight: '700' },
 });

@@ -40,14 +40,14 @@ export default function HomeScreen({ navigation }: any) {
             <Text style={[styles.actionSubtitle, { color: colors.muted }]}>Saisir code-barres, nom et prix</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.actionCard} onPress={() => navigation.navigate('Scan')}>
-            <Text style={styles.actionTitle}>Scanner un produit</Text>
-            <Text style={styles.actionSubtitle}>Utilise la caméra pour ajouter au panier</Text>
+          <TouchableOpacity style={[styles.actionCard, { backgroundColor: String(colors.card), borderColor: String(colors.border) }]} onPress={() => navigation.navigate('Scan')}>
+            <Text style={[styles.actionTitle, { color: colors.text }]}>Scanner un produit</Text>
+            <Text style={[styles.actionSubtitle, { color: colors.muted }]}>Utilise la caméra pour ajouter au panier</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard} onPress={() => navigation.navigate('Cart')}>
-            <Text style={styles.actionTitle}>Voir le panier</Text>
-            <Text style={styles.actionSubtitle}>Consulter / modifier / payer</Text>
+          <TouchableOpacity style={[styles.actionCard, { backgroundColor: String(colors.card), borderColor: String(colors.border) }]} onPress={() => navigation.navigate('Cart')}>
+            <Text style={[styles.actionTitle, { color: colors.text }]}>Voir le panier</Text>
+            <Text style={[styles.actionSubtitle, { color: colors.muted }]}>Consulter / modifier / payer</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.actionCard, { backgroundColor: String(colors.card), borderColor: String(colors.border) }]} onPress={() => navigation.navigate('PayScreen')}>
@@ -55,9 +55,9 @@ export default function HomeScreen({ navigation }: any) {
             <Text style={[styles.actionSubtitle, { color: colors.muted }]}>Payer directement sans passer par le panier</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard} onPress={() => navigation.navigate('History')}>
-            <Text style={styles.actionTitle}>Historique</Text>
-            <Text style={styles.actionSubtitle}>Voir les achats précédents</Text>
+          <TouchableOpacity style={[styles.actionCard, { backgroundColor: String(colors.card), borderColor: String(colors.border) }]} onPress={() => navigation.navigate('History')}>
+            <Text style={[styles.actionTitle, { color: colors.text }]}>Historique</Text>
+            <Text style={[styles.actionSubtitle, { color: colors.muted }]}>Voir les achats précédents</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.actionCard, { backgroundColor: String(colors.card), borderColor: String(colors.border) }]} onPress={async () => {
