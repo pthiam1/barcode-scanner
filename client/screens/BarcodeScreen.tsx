@@ -12,6 +12,7 @@ export default function BarcodeScreen({ navigation }: any) {
   const [scanned, setScanned] = useState(false);
   const [manualBarcode, setManualBarcode] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [scannedItems, setScannedItems] = useState<Array<{ id: string; title: string; price: number; qty?: number }>>([]);
   const { addItem } = useCart();
   const apiUrl = 'http://192.168.0.23:8000'; // Remplace par l'IP de ton backend
   const [lastAdded, setLastAdded] = useState<string | null>(null);
@@ -76,6 +77,9 @@ export default function BarcodeScreen({ navigation }: any) {
           price: product.price             // API renvoie price en centimes
         }, 1);
 
+          // ajouter à la liste de session
+          setScannedItems(prev => [{ id: product.id.toString(), title: product.name, price: product.price, qty: 1 }, ...prev]);
+
         Alert.alert('Ajouté', `${product.name} ajouté au panier`);
       } else if (res.status === 404) {
         Alert.alert('Produit inconnu', 'Ce code-barres n\'existe pas dans la base.');
@@ -110,10 +114,12 @@ export default function BarcodeScreen({ navigation }: any) {
           title: product.name,
           price: product.price,
         }, 1);
+        // ajouter à la liste de session
+        setScannedItems(prev => [{ id: product.id.toString(), title: product.name, price: product.price, qty: 1 }, ...prev]);
 
         Alert.alert('Ajouté', `${product.name} ajouté au panier`);
         setManualBarcode('');
-  setLastAdded(product.name);
+        setLastAdded(product.name);
       } else if (res.status === 404) {
         Alert.alert('Produit inconnu', 'Ce code-barres n\'existe pas dans la base.');
       } else {
@@ -185,6 +191,24 @@ export default function BarcodeScreen({ navigation }: any) {
               </TouchableOpacity>
             </View>
           ) : null}
+
+          {/* Liste des articles scannés pendant la session */}
+          <View style={styles.scannedListContainer}>
+            <Text style={styles.scannedTitle}>Articles scannés (cette session)</Text>
+            {scannedItems.length === 0 ? (
+              <Text style={styles.scannedEmpty}>Aucun article scanné</Text>
+            ) : (
+              scannedItems.map(item => (
+                <View key={`${item.id}-${item.title}`} style={styles.scannedRow}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.scannedName}>{item.title}</Text>
+                    <Text style={styles.scannedPrice}>{(item.price / 100).toFixed(2)} FCFA</Text>
+                  </View>
+                  <Text style={styles.scannedQty}>x{item.qty ?? 1}</Text>
+                </View>
+              ))
+            )}
+          </View>
         </View>
       </Animated.View>
     </View>
@@ -288,4 +312,11 @@ const styles = StyleSheet.create({
     padding: 12,
     justifyContent: 'center'
   },
+  scannedListContainer: { marginTop: 12, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#e6e6e6' },
+  scannedTitle: { fontSize: 14, fontWeight: '700', marginBottom: 8 },
+  scannedEmpty: { color: '#666', fontStyle: 'italic' },
+  scannedRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  scannedName: { fontWeight: '600' },
+  scannedPrice: { fontSize: 12, color: '#666', marginTop: 4 },
+  scannedQty: { marginLeft: 12, fontWeight: '700' },
 });
