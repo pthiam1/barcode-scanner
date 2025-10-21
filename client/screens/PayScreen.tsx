@@ -16,10 +16,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useStripe } from '@stripe/stripe-react-native';
 import { useCart } from './CartContext';
+import { useTheme } from '../theme/ThemeProvider';
 
 export default function PayScreen({ navigation }: any) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { items, getTotalPrice, moveCartToHistory, clearCart } = useCart();
+  const { theme, colors, sizes } = useTheme();
   const [loading, setLoading] = useState(false);
   const [paymentReady, setPaymentReady] = useState(false);
 
@@ -174,14 +176,12 @@ export default function PayScreen({ navigation }: any) {
   // Si le panier est vide
   if (items.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>Panier vide</Text>
-          <Text style={styles.emptySubtitle}>
-            Ajoutez des produits avant de procéder au paiement
-          </Text>
+      <SafeAreaView style={[styles.container, { backgroundColor: String(colors.background) }]}>
+        <View style={[styles.emptyContainer, { backgroundColor: String(colors.surface) }]}>
+          <Text style={[styles.emptyTitle, { color: String(colors.text) }]}>Panier vide</Text>
+          <Text style={[styles.emptySubtitle, { color: String(colors.muted) }]}>Ajoutez des produits avant de procéder au paiement</Text>
           <TouchableOpacity
-            style={styles.backButton}
+            style={[styles.backButton, { backgroundColor: String(colors.primary) }]}
             onPress={() => navigation.navigate('Home')}
           >
             <Text style={styles.backButtonText}>Retour à l'accueil</Text>
@@ -192,74 +192,66 @@ export default function PayScreen({ navigation }: any) {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: String(colors.background) }]}>
       <ScrollView style={styles.content}>
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>💳 Paiement</Text>
-          <Text style={styles.subtitle}>Finalisez votre commande</Text>
+        <View style={[styles.header, { backgroundColor: String(colors.surface), borderBottomColor: String(colors.border) }]}>
+          <Text style={[styles.title, { color: String(colors.text) }]}>💳 Paiement</Text>
+          <Text style={[styles.subtitle, { color: String(colors.muted) }]}>Finalisez votre commande</Text>
         </View>
 
         {/* Résumé de la commande */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📋 Résumé de la commande</Text>
+        <View style={[styles.section, { backgroundColor: String(colors.surface), borderColor: String(colors.border) }]}>
+          <Text style={[styles.sectionTitle, { color: String(colors.text) }]}>📋 Résumé de la commande</Text>
           
           {items.map((item, index) => (
             <View key={`${item.id}-${index}`} style={styles.orderItem}>
               <View style={styles.itemInfo}>
-                <Text style={styles.itemName}>{item.title}</Text>
-                <Text style={styles.itemDetails}>
+                <Text style={[styles.itemName, { color: String(colors.text) }]}>{item.title}</Text>
+                <Text style={[styles.itemDetails, { color: String(colors.muted) }]}>
                   {item.quantity} × {formatPrice(item.price)}
                 </Text>
               </View>
-              <Text style={styles.itemTotal}>
-                {formatPrice(item.price * item.quantity)}
-              </Text>
+              <Text style={[styles.itemTotal, { color: String(colors.success) }]}> {formatPrice(item.price * item.quantity)} </Text>
             </View>
           ))}
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: String(colors.border) }]} />
           
           <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Total à payer</Text>
-            <Text style={styles.totalAmount}>{formatPrice(totalCents)}</Text>
+            <Text style={[styles.totalLabel, { color: String(colors.text) }]}>Total à payer</Text>
+            <Text style={[styles.totalAmount, { color: String(colors.primary) }]}>{formatPrice(totalCents)}</Text>
           </View>
         </View>
 
         {/* Informations paiement */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🔒 Paiement sécurisé</Text>
-          <View style={styles.paymentInfo}>
-            <Text style={styles.paymentText}>
-              • Paiement traité par Stripe
-            </Text>
-            <Text style={styles.paymentText}>
-              • Données cryptées et sécurisées
-            </Text>
-            <Text style={styles.paymentText}>
-              • Cartes Visa, Mastercard acceptées
-            </Text>
+        <View style={[styles.section, { backgroundColor: String(colors.surface), borderColor: String(colors.border) }]}>
+          <Text style={[styles.sectionTitle, { color: String(colors.text) }]}>🔒 Paiement sécurisé</Text>
+          <View style={[styles.paymentInfo, { backgroundColor: String(colors.background) }]}> 
+            <Text style={[styles.paymentText, { color: String(colors.muted) }]}>• Paiement traité par Stripe</Text>
+            <Text style={[styles.paymentText, { color: String(colors.muted) }]}>• Données cryptées et sécurisées</Text>
+            <Text style={[styles.paymentText, { color: String(colors.muted) }]}>• Cartes Visa, Mastercard acceptées</Text>
           </View>
         </View>
 
         {/* Status de préparation */}
         {!paymentReady && !loading && (
-          <View style={styles.statusContainer}>
-            <Text style={styles.statusText}>⏳ Préparation du paiement...</Text>
+          <View style={[styles.statusContainer, { backgroundColor: String(colors.muted), opacity: 0.06 }]}>
+            <Text style={[styles.statusText, { color: String(colors.muted) }]}>⏳ Préparation du paiement...</Text>
             <TouchableOpacity
-              style={styles.retryButton}
+              style={[styles.retryButton, { backgroundColor: String(colors.primary) }]}
               onPress={initializePaymentSheet}
             >
-              <Text style={styles.retryButtonText}>Réessayer</Text>
+              <Text style={[styles.retryButtonText, { color: String(colors.primaryContrast) }]}>Réessayer</Text>
             </TouchableOpacity>
           </View>
         )}
       </ScrollView>
 
       {/* Boutons d'action */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: String(colors.surface), borderTopColor: String(colors.border) }]}> 
         <TouchableOpacity
-          style={styles.cancelButton}
+          style={[styles.cancelButton, { backgroundColor: String(colors.danger) }]}
           onPress={() => navigation.goBack()}
           disabled={loading}
         >
@@ -269,15 +261,16 @@ export default function PayScreen({ navigation }: any) {
         <TouchableOpacity
           style={[
             styles.payButton,
-            (!paymentReady || loading) && styles.payButtonDisabled
+            (!paymentReady || loading) && styles.payButtonDisabled,
+            { backgroundColor: paymentReady ? String(colors.primary) : String(colors.border) }
           ]}
           onPress={handlePayment}
           disabled={!paymentReady || loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color={String(colors.primaryContrast)} size="small" />
           ) : (
-            <Text style={styles.payButtonText}>
+            <Text style={[styles.payButtonText, { color: String(colors.primaryContrast) }]}>
               Payer {formatPrice(totalCents)}
             </Text>
           )}
@@ -290,32 +283,27 @@ export default function PayScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fff',
   },
   content: {
     flex: 1,
   },
   header: {
     padding: 20,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
     textAlign: 'center',
     marginTop: 4,
   },
   section: {
     margin: 15,
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 15,
     elevation: 2,
@@ -327,7 +315,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 15,
   },
   orderItem: {
@@ -342,22 +329,18 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
   },
   itemDetails: {
     fontSize: 12,
-    color: '#666',
     marginTop: 2,
   },
   itemTotal: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#28a745',
     marginLeft: 10,
   },
   divider: {
     height: 1,
-    backgroundColor: '#e9ecef',
     marginVertical: 15,
   },
   totalRow: {
@@ -368,57 +351,46 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
   },
   totalAmount: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#28a745',
   },
   paymentInfo: {
-    backgroundColor: '#f8f9fa',
     borderRadius: 8,
     padding: 12,
   },
   paymentText: {
     fontSize: 13,
-    color: '#666',
     marginBottom: 4,
   },
   statusContainer: {
     margin: 15,
     padding: 20,
-    backgroundColor: '#fff3cd',
     borderRadius: 12,
     alignItems: 'center',
   },
   statusText: {
     fontSize: 14,
-    color: '#856404',
     marginBottom: 10,
   },
   retryButton: {
-    backgroundColor: '#ffc107',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 6,
   },
   retryButtonText: {
-    color: '#212529',
     fontSize: 12,
     fontWeight: '600',
   },
   footer: {
     flexDirection: 'row',
     padding: 20,
-    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#e9ecef',
     gap: 15,
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: '#6c757d',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -430,16 +402,14 @@ const styles = StyleSheet.create({
   },
   payButton: {
     flex: 2,
-    backgroundColor: '#28a745',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
   },
   payButtonDisabled: {
-    backgroundColor: '#adb5bd',
+    opacity: 0.6,
   },
   payButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
