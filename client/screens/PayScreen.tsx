@@ -17,6 +17,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useStripe } from '@stripe/stripe-react-native';
 import { useCart } from './CartContext';
 import { useTheme } from '../theme/ThemeProvider';
+import { createPaymentIntent } from '../services/payments';
+import Constants from 'expo-constants';
 
 export default function PayScreen({ navigation }: any) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
@@ -25,8 +27,8 @@ export default function PayScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
   const [paymentReady, setPaymentReady] = useState(false);
 
-  const apiUrl = 'http://192.168.0.23:8000';
-  const userId = 'cus_TAbp6YpLSrRqOU'; // ID du client créé
+  const apiUrl = Constants.expoConfig?.extra?.API_URL ?? 'http://172.26.4.134:8000';
+  const userId = Constants.expoConfig?.extra?.USER_ID ?? 'cus_TAbp6YpLSrRqOU'; // ID du client (fallback)
 
   // Calculer le total
   const totalCents = getTotalPrice();
@@ -47,24 +49,7 @@ export default function PayScreen({ navigation }: any) {
       setLoading(true);
 
       // Appel API pour créer le Payment Intent
-      const response = await fetch(`${apiUrl}/payments/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customer_id: userId,
-          pending_items: pendingItems,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Erreur API paiement:', errorText);
-        throw new Error(`Erreur API: ${response.status} - ${errorText}`);
-      }
-
-      const { paymentIntent, ephemeralKey, customer } = await response.json();
+      const { paymentIntent, ephemeralKey, customer } = await createPaymentIntent(userId, pendingItems);
 
       // Initialiser le Payment Sheet
       const { error } = await initPaymentSheet({

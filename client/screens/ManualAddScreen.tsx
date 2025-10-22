@@ -8,6 +8,7 @@ import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, Alert, Pressabl
 import { useTheme } from '../theme/ThemeProvider';
 import { useCart } from './CartContext';
 import AddProductCard from '../components/AddProductCard';
+import Constants from 'expo-constants';
 
 export default function ManualAddScreen({ navigation }: any) {
   const { theme } = useTheme();
@@ -17,7 +18,7 @@ export default function ManualAddScreen({ navigation }: any) {
   const [price, setPrice] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
-  const apiUrl = 'http://172.26.4.34:8000';
+  const apiUrl = Constants.expoConfig?.extra?.API_URL ?? 'http://172.26.4.34:8000';
 
   const presets = [
     { title: 'Banane Bio', price: '250' },

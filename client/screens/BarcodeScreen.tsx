@@ -20,6 +20,7 @@ import {
 import AddProductCard from '../components/AddProductCard';
 import { CameraView, Camera } from 'expo-camera';
 import { useCart } from './CartContext';
+import { getItemByBarcode } from '../services/items';
 
 export default function BarcodeScreen({ navigation }: any) {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -28,7 +29,7 @@ export default function BarcodeScreen({ navigation }: any) {
   const [isAdding, setIsAdding] = useState(false);
   const [scannedItems, setScannedItems] = useState<Array<{ id: string; title: string; price: number; qty?: number }>>([]);
   const { addItem, setQuantity } = useCart();
-  const apiUrl = 'http://192.168.0.23:8000';
+  // API URL is handled in client/api.ts
   const [lastAdded, setLastAdded] = useState<string | null>(null);
 
   const shift = useRef(new Animated.Value(0)).current;
@@ -82,36 +83,29 @@ export default function BarcodeScreen({ navigation }: any) {
     setScanned(true);
 
     try {
-      const res = await fetch(`${apiUrl}/items/barcode/${encodeURIComponent(data)}`);
-      if (res.status === 200) {
-        const product = await res.json();
+      const product = await getItemByBarcode(data);
 
-        await addItem({
-          id: product.id.toString(),
-          title: product.name,
-          price: product.price,
-        }, 1);
+      await addItem({ id: product.id.toString(), title: product.name, price: product.price }, 1);
 
-        setScannedItems(prev => {
-          const existing = prev.find(p => p.id === String(product.id));
-          if (existing) {
-            return prev.map(p => p.id === String(product.id)
-              ? { ...p, qty: (p.qty ?? 1) + 1 }
-              : p);
-          }
-          return [{ id: product.id.toString(), title: product.name, price: product.price, qty: 1 }, ...prev];
-        });
+      setScannedItems(prev => {
+        const existing = prev.find(p => p.id === String(product.id));
+        if (existing) {
+          return prev.map(p => p.id === String(product.id)
+            ? { ...p, qty: (p.qty ?? 1) + 1 }
+            : p);
+        }
+        return [{ id: product.id.toString(), title: product.name, price: product.price, qty: 1 }, ...prev];
+      });
 
-        setLastAdded(product.name);
-        Alert.alert('✅ Ajouté', `${product.name} ajouté au panier`);
-      } else if (res.status === 404) {
+      setLastAdded(product.name);
+      Alert.alert('✅ Ajouté', `${product.name} ajouté au panier`);
+    } catch (error: any) {
+      if (error?.status === 404 || error?.message === 'NOT_FOUND') {
         Alert.alert('Produit inconnu', 'Ce code-barres n’existe pas dans la base.');
       } else {
-        Alert.alert('Erreur', 'Impossible de récupérer le produit.');
+        console.error(error);
+        Alert.alert('Erreur réseau', 'Impossible de vérifier le produit.');
       }
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Erreur réseau', 'Impossible de vérifier le produit.');
     }
 
     setTimeout(() => setScanned(false), 1500);
@@ -126,29 +120,29 @@ export default function BarcodeScreen({ navigation }: any) {
     setIsAdding(true);
 
     try {
-      const res = await fetch(`${apiUrl}/items/barcode/${encodeURIComponent(manualBarcode)}`);
-      if (res.status === 200) {
-        const product = await res.json();
-        await addItem({ id: product.id.toString(), title: product.name, price: product.price }, 1);
+      const product = await getItemByBarcode(manualBarcode);
+      await addItem({ id: product.id.toString(), title: product.name, price: product.price }, 1);
 
-        setScannedItems(prev => {
-          const existing = prev.find(p => p.id === String(product.id));
-          if (existing) {
-            return prev.map(p => p.id === String(product.id)
-              ? { ...p, qty: (p.qty ?? 1) + 1 }
-              : p);
-          }
-          return [{ id: product.id.toString(), title: product.name, price: product.price, qty: 1 }, ...prev];
-        });
+      setScannedItems(prev => {
+        const existing = prev.find(p => p.id === String(product.id));
+        if (existing) {
+          return prev.map(p => p.id === String(product.id)
+            ? { ...p, qty: (p.qty ?? 1) + 1 }
+            : p);
+        }
+        return [{ id: product.id.toString(), title: product.name, price: product.price, qty: 1 }, ...prev];
+      });
 
-        setLastAdded(product.name);
-        setManualBarcode('');
-        Alert.alert('✅ Ajouté', `${product.name} ajouté au panier`);
-      } else {
+      setLastAdded(product.name);
+      setManualBarcode('');
+      Alert.alert('✅ Ajouté', `${product.name} ajouté au panier`);
+    } catch (error: any) {
+      if (error?.status === 404 || error?.message === 'NOT_FOUND') {
         Alert.alert('Produit non trouvé', 'Ce code-barres n’existe pas dans la base.');
+      } else {
+        console.error(error);
+        Alert.alert('Erreur réseau', 'Impossible d’ajouter le produit.');
       }
-    } catch (error) {
-      Alert.alert('Erreur réseau', 'Impossible d’ajouter le produit.');
     } finally {
       setIsAdding(false);
     }

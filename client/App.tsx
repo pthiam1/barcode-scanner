@@ -13,7 +13,7 @@ import ManualAddScreen from './screens/ManualAddScreen';
 import CartScreen from './screens/CartScreen';
 import HistoryScreen from './screens/HistoryScreenTemp';
 import PayScreen from './screens/PayScreen';
-import CheckoutScreen from './CheckoutScreen';
+
 
 // Navigation types
 export type RootStackParamList = {
@@ -62,7 +62,6 @@ const AppNavigator: React.FC = () => {
         <Stack.Screen name="Cart" component={CartScreen} options={{ title: 'Mon Panier', headerShown: false }} />
         <Stack.Screen name="History" component={HistoryScreen} options={{ title: 'Historique des achats', headerShown: false }} />
         <Stack.Screen name="PayScreen" component={PayScreen} options={{ title: 'Paiement', headerShown: false }} />
-        <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ title: 'Paiement', headerBackTitle: 'Panier' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

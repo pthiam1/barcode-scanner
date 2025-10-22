@@ -45,6 +45,10 @@ barcode-scanner/
 │  ├─ assets/      # images et icônes
 │  ├─ screens/     # écrans (Barcode, Cart, History, ...)
 │  └─ theme/       # ThemeProvider + toggle
+├─ MyTest/       # tests unitaires API client
+├─ services/    # appels API (produits, paiements)
+	├─ items.ts	# gestion produits
+	└─ payments.ts # gestion paiements
 ├─ server/        # FastAPI (produits, paiements)
 └─ Code-barre/    # scripts utilitaires
 ```
