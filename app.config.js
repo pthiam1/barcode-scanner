@@ -6,6 +6,7 @@ export default ({ config }) => {
     extra: {
       API_URL: process.env.API_URL,
       USER_ID: process.env.USER_ID,
+      STRIPE_PK: process.env.STRIPE_PK,
     },
   };
 };
