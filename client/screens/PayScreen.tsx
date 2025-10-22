@@ -48,6 +48,9 @@ export default function PayScreen({ navigation }: any) {
     try {
       setLoading(true);
 
+      // Debug: log de l'API_URL utilisée
+      console.log('Initializing payment sheet. API_URL =', apiUrl);
+
       // Appel API pour créer le Payment Intent
       const { paymentIntent, ephemeralKey, customer } = await createPaymentIntent(userId, pendingItems);
 
@@ -73,7 +76,9 @@ export default function PayScreen({ navigation }: any) {
       setPaymentReady(true);
     } catch (error) {
       console.error('Erreur lors de l\'initialisation:', error);
-      Alert.alert('Erreur réseau', 'Vérifiez votre connexion et réessayez');
+      // Show a more informative error when possible
+      const msg = (error && (error as any).message) ? (error as any).message : 'Vérifiez votre connexion et réessayez';
+      Alert.alert('Erreur réseau', `API_URL = ${apiUrl}\n${msg}`);
     } finally {
       setLoading(false);
     }
