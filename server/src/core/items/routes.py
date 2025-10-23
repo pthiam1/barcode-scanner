@@ -53,3 +53,5 @@ def read_item_by_barcode(
 ):
     from .controllers import get_item_by_barcode
     return get_item_by_barcode(barcode)
+
+

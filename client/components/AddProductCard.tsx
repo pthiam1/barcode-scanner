@@ -34,7 +34,7 @@ export default function AddProductCard({
   const { theme } = useTheme();
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const doPulse = () => {
+  const doPulse = () => { 
     Animated.sequence([
       Animated.timing(scaleAnim, { toValue: 0.97, duration: 110, useNativeDriver: true }),
       Animated.timing(scaleAnim, { toValue: 1, duration: 160, useNativeDriver: true }),
